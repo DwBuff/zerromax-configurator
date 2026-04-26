@@ -1,0 +1,85 @@
+id,price
+
+# FACADE
+facade.wood,0
+facade.plaster,3980
+facade.larch,5900
+
+# EXTERIOR DOOR
+exterior_door.normal,0
+exterior_door.balcony,0
+
+# CANOPY (TERRACE)
+terrace.0,0
+terrace.70,0
+
+# TERRACE FLOOR
+terrace_floor.spruce,1790
+terrace_floor.wpc,2890
+terrace_floor.tropical,3690
+
+# WINDOWS TYPE
+windows_type.fixed,0
+windows_type.door_1_4,0
+windows_type.sliding_1_4,0
+windows_type.sliding_1_2,0
+
+# WINDOW COLOR
+windows_color.white,0
+windows_color.anthracite,0
+windows_color.mixed,0
+
+# FLOOR CONSTRUCTION
+floor_construction.wood,0
+floor_construction.magnelis,1990
+
+# CONSTRUCTION
+construction.wood,0
+construction.magnelis,3990
+
+# INSULATION
+insulation.none,0
+insulation.eps_100,1960
+
+# FLOOR CLADDING
+floor_cladding.laminate,0
+floor_cladding.vinyl,0
+
+# MANSARD
+mansard.half,0
+mansard.full,1990
+
+# STAIRS
+staircase.basic,0
+staircase.hi,0
+
+# INTERIOR WALL
+interior_wall.plywood,0
+interior_wall.cladding,0
+
+# BATHROOM EQUIPMENT
+bathroom.none,0
+bathroom.basic,0
+bathroom.lux,0
+
+# BATHROOM WALLS
+bathroom_walls.white,0
+bathroom_walls.gray,0
+
+# ROOF TYPE
+roof_type.sheet,0
+roof_type.tile,0
+
+# ROOF COLOR
+roof_color.anthracite,0
+roof_color.black,590
+roof_color.white,590
+roof_color.brown,590
+
+# KNEE WALL
+knee_wall.80,0
+knee_wall.100,1990
+
+# EQUIPMENT (BOILER)
+boiler.boiler_50,550
+boiler.boiler_80,890

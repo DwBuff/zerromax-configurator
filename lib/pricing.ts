@@ -1,6 +1,7 @@
 import { models, type ModelKey, type Category, type Subcategory } from "../data/models";
 
 export type ConfigState = Record<string, string>;
+export type PriceMap = Record<string, number>;
 
 type FlatGroup = {
   id: string;
@@ -13,6 +14,11 @@ type FlatGroup = {
     category: string;
     hideIf: string[];
   };
+};
+
+type BreakdownItem = {
+  label: string;
+  value: number;
 };
 
 function flattenGroups(modelKey: ModelKey): FlatGroup[] {
@@ -43,6 +49,22 @@ function flattenGroups(modelKey: ModelKey): FlatGroup[] {
   return groups;
 }
 
+function getOptionPrice(
+  groupId: string,
+  optionKey: string,
+  fallbackPrice: number,
+  priceMap?: PriceMap
+): number {
+  if (!priceMap) return fallbackPrice;
+
+  const csvKey = `${groupId}.${optionKey}`;
+  const csvPrice = priceMap[csvKey];
+
+  return typeof csvPrice === "number" && !Number.isNaN(csvPrice)
+    ? csvPrice
+    : fallbackPrice;
+}
+
 export function isOptionGroupVisible(
   modelKey: ModelKey,
   config: ConfigState,
@@ -57,7 +79,11 @@ export function isOptionGroupVisible(
   return !group.dependsOn.hideIf.includes(dependentValue);
 }
 
-export function calculatePrice(modelKey: ModelKey, config: ConfigState): number {
+export function calculatePrice(
+  modelKey: ModelKey,
+  config: ConfigState,
+  priceMap?: PriceMap
+): number {
   const model = models[modelKey];
   const groups = flattenGroups(modelKey);
 
@@ -70,19 +96,23 @@ export function calculatePrice(modelKey: ModelKey, config: ConfigState): number 
     if (!selectedKey) return;
 
     const option = group.options.values[selectedKey];
-    if (option) {
-      total += option.price;
-    }
+    if (!option) return;
+
+    total += getOptionPrice(group.id, selectedKey, option.price, priceMap);
   });
 
   return total;
 }
 
-export function getBreakdown(modelKey: ModelKey, config: ConfigState) {
+export function getBreakdown(
+  modelKey: ModelKey,
+  config: ConfigState,
+  priceMap?: PriceMap
+): BreakdownItem[] {
   const model = models[modelKey];
   const groups = flattenGroups(modelKey);
 
-  const breakdown: { label: string; value: number }[] = [
+  const breakdown: BreakdownItem[] = [
     { label: "Base", value: model.basePrice },
   ];
 
@@ -97,7 +127,7 @@ export function getBreakdown(modelKey: ModelKey, config: ConfigState) {
 
     breakdown.push({
       label: `${group.name} (${option.label})`,
-      value: option.price,
+      value: getOptionPrice(group.id, selectedKey, option.price, priceMap),
     });
   });
 

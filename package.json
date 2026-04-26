@@ -13,6 +13,7 @@
     "@react-three/fiber": "^9.5.0",
     "jspdf": "^4.2.1",
     "next": "16.2.1",
+    "papaparse": "^5.5.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "three": "^0.183.2"
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
