@@ -190,6 +190,14 @@ export default function Home() {
   const [language, setLanguage] = useState<"en" | "sl">("en");
 const t = translations[language];
 
+const [isSalesPath, setIsSalesPath] = useState(false);
+useEffect(() => {
+  const salesPath = window.location.pathname.startsWith("/sales");
+
+  setIsSalesPath(salesPath);
+  setIsSalesMode(salesPath);
+}, []); // to je OK, warning lahko ignoriraš
+
 const translateLabel = (label: string) => {
   if (language === "en") return label;
   return labelTranslations[language]?.[label] || label;
@@ -1111,6 +1119,7 @@ ${shareUrl}
   </button>
 </div>
 
+{!isSalesPath && (
             <div
               style={{
                 display: "grid",
@@ -1144,9 +1153,10 @@ ${shareUrl}
                 </div>
               </div>
             </div>
-          </div>
+    )}  </div>                                     
 
-          <section
+          {false && (
+  <section
   style={{
     background: "#17181b",
     border: "1px solid #2a2c31",
@@ -1189,6 +1199,9 @@ ${shareUrl}
     </button>
   </div>
 </section>
+)}
+
+
        {isSalesMode && (
           <section style={{ background: "#17181b", border: "1px solid #2a2c31", borderRadius: 28, padding: 22, marginBottom: 16 }}>
             <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 700 }}>{t.offerDetails}</h2>
