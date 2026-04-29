@@ -46,7 +46,7 @@ export type ModelDefinition = {
   categories: Category[];
 };
 
-const sharedWoodCategories: Category[] = [
+const wood36Categories: Category[] = [
   {
     id: "floor_construction",
     name: "Floor Construction",
@@ -54,7 +54,7 @@ const sharedWoodCategories: Category[] = [
       default: "wood",
       values: {
         wood: { label: "Wood", price: 0 },
-        magnelis: { label: "Magnelis metal", price: 1990 },
+        magnelis: { label: "Magnelis metal", price: 0 },
       },
     },
   },
@@ -65,7 +65,7 @@ const sharedWoodCategories: Category[] = [
       default: "wood",
       values: {
         wood: { label: "Wood", price: 0 },
-        magnelis: { label: "Magnelis metal", price: 3990 },
+        magnelis: { label: "Magnelis metal", price: 0 },
       },
     },
   },
@@ -80,8 +80,8 @@ const sharedWoodCategories: Category[] = [
           default: "wood",
           values: {
             wood: { label: "Vilo - Wood", price: 0 },
-            plaster: { label: "Contact facade plaster 1.5mm", price: 3980 },
-            larch: { label: "Facade cladding Larch", price: 5900 },
+            plaster: { label: "Contact facade plaster 1.5mm", price: 0 },
+            larch: { label: "Facade cladding Larch", price: 0 },
           },
         },
       },
@@ -117,12 +117,9 @@ const sharedWoodCategories: Category[] = [
         options: {
           default: "spruce",
           values: {
-            spruce: { label: "Wooden cladding (spruce)", price: 1790 },
-            wpc: { label: "Wooden cladding (WPC)", price: 2890 },
-            tropical: {
-              label: "Wooden cladding (tropical wood)",
-              price: 3690,
-            },
+            spruce: { label: "Wooden cladding (spruce)", price: 0 },
+            wpc: { label: "Wooden cladding (WPC)", price: 0 },
+            tropical: { label: "Wooden cladding (tropical wood)", price: 0 },
           },
         },
       },
@@ -169,9 +166,9 @@ const sharedWoodCategories: Category[] = [
           default: "anthracite",
           values: {
             anthracite: { label: "Anthracite", price: 0 },
-            black: { label: "Black", price: 590 },
-            white: { label: "White", price: 590 },
-            brown: { label: "Brown", price: 590 },
+            black: { label: "Black", price: 0 },
+            white: { label: "White", price: 0 },
+            brown: { label: "Brown", price: 0 },
           },
         },
       },
@@ -182,7 +179,7 @@ const sharedWoodCategories: Category[] = [
           default: "80",
           values: {
             "80": { label: "80 cm", price: 0 },
-            "100": { label: "100 cm", price: 1990 },
+            "100": { label: "100 cm", price: 0 },
           },
         },
       },
@@ -193,10 +190,7 @@ const sharedWoodCategories: Category[] = [
           default: "none",
           values: {
             none: { label: "No extra insulation", price: 0 },
-            eps100: {
-              label: "Additional insulation 100mm EPS",
-              price: 1960,
-            },
+            eps100: { label: "Additional insulation 100mm EPS", price: 0 },
           },
         },
       },
@@ -213,8 +207,8 @@ const sharedWoodCategories: Category[] = [
           default: "none",
           values: {
             none: { label: "No bathroom", price: 0 },
-            basic: { label: "Basic", price: 1690 },
-            lux: { label: "LUX", price: 2690 },
+            basic: { label: "Basic", price: 0 },
+            lux: { label: "LUX", price: 0 },
           },
         },
       },
@@ -236,7 +230,7 @@ const sharedWoodCategories: Category[] = [
           default: "basic",
           values: {
             basic: { label: "Basic", price: 0 },
-            hi: { label: "HI", price: 1390 },
+            hi: { label: "HI", price: 0 },
           },
         },
       },
@@ -247,7 +241,7 @@ const sharedWoodCategories: Category[] = [
           default: "plywood",
           values: {
             plywood: { label: "Plywood", price: 0 },
-            cladding: { label: "Wall cladding", price: 2980 },
+            cladding: { label: "Wall cladding", price: 0 },
           },
         },
       },
@@ -258,7 +252,7 @@ const sharedWoodCategories: Category[] = [
           default: "laminate",
           values: {
             laminate: { label: "Laminate", price: 0 },
-            vinyl: { label: "Vinyl", price: 590 },
+            vinyl: { label: "Vinyl", price: 0 },
           },
         },
       },
@@ -269,7 +263,7 @@ const sharedWoodCategories: Category[] = [
           default: "half",
           values: {
             half: { label: "Half", price: 0 },
-            full: { label: "Full", price: 1990 },
+            full: { label: "Full", price: 0 },
           },
         },
       },
@@ -282,11 +276,15 @@ const sharedWoodCategories: Category[] = [
       default: "none",
       values: {
         none: { label: "No boiler", price: 0 },
-        boiler_50: { label: "Boiler 50L", price: 550 },
-        boiler_80: { label: "Boiler 80L", price: 890 },
+        boiler_50: { label: "Boiler 50L", price: 0 },
+        boiler_80: { label: "Boiler 80L", price: 0 },
       },
     },
   },
+];
+
+const wood50Categories: Category[] = [
+  ...wood36Categories,
 ];
 
 const createModel = (
@@ -295,7 +293,8 @@ const createModel = (
   dimensions: string,
   grossArea: string,
   basePrice: number,
-  glb: string
+  glb: string,
+  categories: Category[]
 ): ModelDefinition => ({
   id,
   name,
@@ -307,17 +306,18 @@ const createModel = (
   },
   glb,
   basePrice,
-  categories: sharedWoodCategories,
+  categories,
 });
 
 export const models = {
-  wood36: createModel("wood36", "Wood 36", "6m × 4m", "36 m²", 17900, "/models/wood36.glb"),
-  wood50: createModel("wood50", "Wood 50", "10m × 5m", "50 m²", 0, "/models/wood50.glb"),
-  wood80: createModel("wood80", "Wood 80", "10m × 8m", "80 m²", 0, "/models/wood80.glb"),
-  zen30: createModel("zen30", "Zen 30", "10m × 3m", "30 m²", 0, "/models/zen30.glb"),
-  zen44: createModel("zen44", "Zen 44", "11m × 4m", "44 m²", 0, "/models/zen44.glb"),
-  zen66: createModel("zen66", "Zen 66", "11m × 6m", "66 m²", 0, "/models/zen66.glb"),
-  mobile24: createModel("mobile24", "Mobile 24", "8m × 3m", "24 m²", 0, "/models/mobile24.glb"),
+  wood36: createModel("wood36", "Wood 36", "6m × 4m", "36 m²", 17900, "/models/wood36.glb", wood36Categories),
+  wood50: createModel("wood50", "Wood 50", "8,3m × 5m", "50 m²", 0, "/models/wood50.glb", wood50Categories),
+
+  wood80: createModel("wood80", "Wood 80", "10m × 8m", "80 m²", 0, "/models/wood80.glb", []),
+  zen30: createModel("zen30", "Zen 30", "10m × 3m", "30 m²", 0, "/models/zen30.glb", []),
+  zen44: createModel("zen44", "Zen 44", "11m × 4m", "44 m²", 0, "/models/zen44.glb", []),
+  zen66: createModel("zen66", "Zen 66", "11m × 6m", "66 m²", 0, "/models/zen66.glb", []),
+  mobile24: createModel("mobile24", "Mobile 24", "8m × 3m", "24 m²", 0, "/models/mobile24.glb", []),
 } satisfies Record<string, ModelDefinition>;
 
 export type ModelKey = keyof typeof models;

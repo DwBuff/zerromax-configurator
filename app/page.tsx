@@ -203,7 +203,17 @@ const translateLabel = (label: string) => {
   return labelTranslations[language]?.[label] || label;
 };
 
+const [includeDeliveryAssembly, setIncludeDeliveryAssembly] = useState(false);
+
 const [modelKey, setModelKey] = useState<ModelKey>("wood36");
+
+useEffect(() => {
+  const pathModel = window.location.pathname.replace("/", "") as ModelKey;
+
+  if (models[pathModel]) {
+    setModelKey(pathModel);
+  }
+}, []);
 const model = models[modelKey];
 
 const availableModels: ModelKey[] = ["wood36", "wood50"];
@@ -402,10 +412,15 @@ useEffect(() => {
 
   const deliveryCost = useMemo(() => deliveryKmNumber * 1.8, [deliveryKmNumber]);
 
-  const finalTotal = useMemo(
-    () => productTotal + deliveryCost + assemblyCost,
-    [productTotal, deliveryCost]
-  );
+  const deliveryAndAssemblyCost =
+  isSalesMode && includeDeliveryAssembly
+    ? deliveryCost + assemblyCost
+    : 0;
+
+const finalTotal = useMemo(
+  () => productTotal + deliveryAndAssemblyCost,
+  [productTotal, deliveryAndAssemblyCost]
+);
 
   const finalTotalFormatted = finalTotal.toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -431,16 +446,7 @@ useEffect(() => {
     return "exterior" as const;
   };
 
-  const copyShareLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      alert("Could not copy link.");
-    }
-  };
-
+ 
   const priceLabel = (value: number) => {
   if (value === 0) return t.included;
   return `+€${value.toLocaleString("en-US", {
@@ -590,14 +596,17 @@ ${shareUrl}
     logo.onerror = () => drawPdf(false);
   };
 
-  const getDisplayPrice = (groupId: string, optionKey: string, fallbackPrice: number) => {
-    const csvKey = `${groupId}.${optionKey}`;
-    const csvPrice = priceMap[csvKey];
+  const getDisplayPrice = (groupId: string, optionKey: string) => {
+  const csvKey = `${modelKey}.${groupId}.${optionKey}`;
+  const csvPrice = priceMap[csvKey];
 
-    return typeof csvPrice === "number" && !Number.isNaN(csvPrice)
-      ? csvPrice
-      : fallbackPrice;
-  };
+  if (typeof csvPrice === "number" && !Number.isNaN(csvPrice)) {
+    return csvPrice;
+  }
+
+  console.warn(`Missing CSV display price: ${csvKey}`);
+  return 0;
+};
 
   const getOptionUiType = (groupId: string) => {
     if (["facade", "window_color", "roof_color", "bathroom_walls"].includes(groupId)) {
@@ -673,7 +682,7 @@ ${shareUrl}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
         {visibleEntries.map(([key, value]) => {
           const active = selectedValue === key;
-          const displayPrice = getDisplayPrice("equipment", key, value.price);
+          const displayPrice = getDisplayPrice("equipment", key)
 
           return (
             <button
@@ -743,7 +752,7 @@ ${shareUrl}
 
     const [entryKey, entry] = visibleEntry;
     const active = selectedValue === entryKey;
-    const displayPrice = getDisplayPrice("extra_insulation", entryKey, entry.price);
+    const displayPrice = getDisplayPrice("extra_insulation", entryKey)
 
     return (
       <button
@@ -821,7 +830,7 @@ ${shareUrl}
         >
           {Object.entries(values).map(([key, value]) => {
             const active = selectedValue === key;
-            const displayPrice = getDisplayPrice(groupId, key, value.price);
+            const displayPrice = getDisplayPrice(groupId, key,);
 
             return (
               <button
@@ -871,7 +880,7 @@ ${shareUrl}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
         {Object.entries(values).map(([key, value]) => {
           const active = selectedValue === key;
-          const displayPrice = getDisplayPrice(groupId, key, value.price);
+          const displayPrice = getDisplayPrice(groupId, key)
 
           return (
             <button
@@ -930,281 +939,249 @@ ${shareUrl}
 
   if (!mounted) return null;
 
-  return (
-    <main style={{ minHeight: "100vh", background: "#111214", color: "#f3f0ea" }}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "minmax(380px, 520px) 1fr",
-          minHeight: "100vh",
-        }}
-      >
-        {isMobile && (
-  <div
-    style={{
-      background: "#121316",
-      position: "sticky",
-      top: 0,
-      zIndex: 25,
-      height: 380,
-      borderBottom: "1px solid #22242a",
-      boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-    }}
-  >
-            <div
-              style={{
-                position: "absolute",
-                top: 14,
-                right: 14,
-                zIndex: 20,
-                display: "flex",
-                gap: 8,
-                padding: 8,
-                borderRadius: 18,
-                background: "rgba(23,24,27,0.82)",
-                border: "1px solid #2a2c31",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              {[
-                { id: "exterior", label: "Exterior" },
-                { id: "interior", label: "Interior" },
-                { id: "bathroom", label: "Bathroom" },
-              ].map((item) => {
-                const active = viewMode === item.id;
-
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setViewMode(item.id as typeof viewMode)}
-                    style={{
-                      borderRadius: 14,
-                      padding: "10px 12px",
-                      border: active ? "1px solid #b79e84" : "1px solid transparent",
-                      background: active ? "#b79e84" : "transparent",
-                      color: active ? "#111214" : "#f3f0ea",
-                      fontWeight: 700,
-                      fontSize: 12,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {translateLabel(item.label)}
-                  </button>
-                );
-              })}
-            </div>
-
-            <ModelViewer
-              modelPath={model.glb}
-              terrace={config.terrace}
-              facade={config.facade}
-              terraceCladding={config.terrace_floor}
-              windowType={config.windows_type}
-              windowColor={config.windows_color}
-              exteriorDoor={config.exterior_door}
-              viewMode={viewMode}
-              mansard={config.mansard}
-              floorCladding={config.floor_cladding}
-              staircase={config.staircase}
-              interiorWall={config.interior_wall}
-              roofType={config.roof_type}
-              roofColor={config.roof_color}
-              bathroomWalls={config.bathroom_walls}
-              bathroom={config.bathroom}
-            />
-          </div>
-        )}
-
+return (
+  <main style={{ minHeight: "100vh", background: "#111214", color: "#f3f0ea" }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "minmax(380px, 520px) 1fr",
+        minHeight: "100vh",
+      }}
+    >
+      {isMobile && (
         <div
           style={{
-            borderRight: isMobile ? "none" : "1px solid #22242a",
-            padding: isMobile ? "20px 14px 120px" : "28px 22px 120px",
-            overflowY: "auto",
-            background: "#111214",
-            order: isMobile ? 2 : 1,
+            background: "#121316",
+            position: "sticky",
+            top: 0,
+            zIndex: 25,
+            height: 380,
+            borderBottom: "1px solid #22242a",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
           }}
         >
-          <div style={{ textAlign: "left", marginBottom: 22 }}>
-            <div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 16,
-    marginBottom: 20,
-  }}
->
-  <img
-    src="/logo-white.svg"
-    alt="ZerroMax"
-    style={{ width: isMobile ? 150 : 180, height: "auto" }}
-  />
+          <div
+            style={{
+              position: "absolute",
+              top: 14,
+              right: 14,
+              zIndex: 20,
+              display: "flex",
+              gap: 8,
+              padding: 8,
+              borderRadius: 18,
+              background: "rgba(23,24,27,0.82)",
+              border: "1px solid #2a2c31",
+              backdropFilter: "blur(10px)",
+            }}
+          >
+            {[
+              { id: "exterior", label: "Exterior" },
+              { id: "interior", label: "Interior" },
+              { id: "bathroom", label: "Bathroom" },
+            ].map((item) => {
+              const active = viewMode === item.id;
 
-  <select
-    value={language}
-    onChange={(e) => setLanguage(e.target.value as "en" | "sl")}
-    style={{
-      borderRadius: 14,
-      border: "1px solid #2a2c31",
-      background: "#1c1d21",
-      color: "#f3f0ea",
-      padding: "10px 12px",
-      fontSize: 14,
-      fontWeight: 700,
-      cursor: "pointer",
-      outline: "none",
-    }}
-  >
-    <option value="en">EN</option>
-    <option value="sl">SL</option>
-  </select>
-</div>
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setViewMode(item.id as typeof viewMode)}
+                  style={{
+                    borderRadius: 14,
+                    padding: "10px 12px",
+                    border: active ? "1px solid #b79e84" : "1px solid transparent",
+                    background: active ? "#b79e84" : "transparent",
+                    color: active ? "#111214" : "#f3f0ea",
+                    fontWeight: 700,
+                    fontSize: 12,
+                    cursor: "pointer",
+                  }}
+                >
+                  {translateLabel(item.label)}
+                </button>
+              );
+            })}
+          </div>
 
-            <div     
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: isMobile ? 14 : 20,
-  }}
->
-  <button
-    onClick={goToPreviousModel}
-    style={{
-      width: isMobile ? 38 : 44,
-      height: isMobile ? 38 : 44,
-      borderRadius: "50%",
-      border: "1px solid #2a2c31",
-      background: "#1c1d21",
-      color: "#f3f0ea",
-      fontSize: isMobile ? 22 : 26,
-      fontWeight: 700,
-      cursor: "pointer",
-      lineHeight: 1,
-    }}
-  >
-    ‹
-  </button>
+          <ModelViewer
+            modelPath={model.glb}
+            terrace={config.terrace}
+            facade={config.facade}
+            terraceCladding={config.terrace_floor}
+            windowType={config.windows_type}
+            windowColor={config.windows_color}
+            exteriorDoor={config.exterior_door}
+            viewMode={viewMode}
+            mansard={config.mansard}
+            floorCladding={config.floor_cladding}
+            staircase={config.staircase}
+            interiorWall={config.interior_wall}
+            roofType={config.roof_type}
+            roofColor={config.roof_color}
+            bathroomWalls={config.bathroom_walls}
+            bathroom={config.bathroom}
+          />
+        </div>
+      )}
 
-  <h1
-    style={{
-      margin: 0,
-      fontSize: isMobile ? 42 : 58,
-      lineHeight: 1,
-      fontWeight: 700,
-      letterSpacing: "-0.04em",
-      textAlign: "center",
-      minWidth: isMobile ? 180 : 260,
-    }}
-  >
-    {modelDisplayName}
-  </h1>
+      <div
+        style={{
+          borderRight: isMobile ? "none" : "1px solid #22242a",
+          padding: isMobile ? "20px 14px 120px" : "28px 22px 120px",
+          overflowY: "auto",
+          background: "#111214",
+          order: isMobile ? 2 : 1,
+        }}
+      >
+        <div style={{ textAlign: "left", marginBottom: 22 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 16,
+              marginBottom: 20,
+            }}
+          >
+            <img
+              src="/logo-white.svg"
+              alt="ZerroMax"
+              style={{ width: isMobile ? 150 : 180, height: "auto" }}
+            />
 
-  <button
-    onClick={goToNextModel}
-    style={{
-      width: isMobile ? 38 : 44,
-      height: isMobile ? 38 : 44,
-      borderRadius: "50%",
-      border: "1px solid #2a2c31",
-      background: "#1c1d21",
-      color: "#f3f0ea",
-      fontSize: isMobile ? 22 : 26,
-      fontWeight: 700,
-      cursor: "pointer",
-      lineHeight: 1,
-    }}
-  >
-    ›
-  </button>
-</div>
-
-{!isSalesPath && (
-            <div
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as "en" | "sl")}
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: 10,
-                marginTop: 24,
+                borderRadius: 14,
+                border: "1px solid #2a2c31",
+                background: "#1c1d21",
+                color: "#f3f0ea",
+                padding: "10px 12px",
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: "pointer",
+                outline: "none",
               }}
             >
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 700, color: "#f3f0ea" }}>
-                  {modelDimensions}
-                </div>
-                <div style={{ marginTop: 6, fontSize: isMobile ? 12 : 13, color: "#b7ab9a" }}>
-                  {t.dimensions}
-                </div>
+              <option value="en">EN</option>
+              <option value="sl">SL</option>
+            </select>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: isMobile ? 14 : 20,
+            }}
+          >
+            {isSalesMode && (
+              <button
+                onClick={goToPreviousModel}
+                style={{
+                  width: isMobile ? 38 : 44,
+                  height: isMobile ? 38 : 44,
+                  borderRadius: "50%",
+                  border: "1px solid #2a2c31",
+                  background: "#1c1d21",
+                  color: "#f3f0ea",
+                  fontSize: isMobile ? 22 : 26,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  lineHeight: 1,
+                }}
+              >
+                ‹
+              </button>
+            )}
+
+            <h1
+              style={{
+                margin: 0,
+                fontSize: isMobile ? 42 : 58,
+                lineHeight: 1,
+                fontWeight: 700,
+                letterSpacing: "-0.04em",
+                textAlign: "center",
+                minWidth: isMobile ? 180 : 260,
+              }}
+            >
+              {modelDisplayName}
+            </h1>
+
+            {isSalesMode && (
+              <button
+                onClick={goToNextModel}
+                style={{
+                  width: isMobile ? 38 : 44,
+                  height: isMobile ? 38 : 44,
+                  borderRadius: "50%",
+                  border: "1px solid #2a2c31",
+                  background: "#1c1d21",
+                  color: "#f3f0ea",
+                  fontSize: isMobile ? 22 : 26,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  lineHeight: 1,
+                }}
+              >
+                ›
+              </button>
+            )}
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 10,
+              marginTop: 24,
+            }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 700, color: "#f3f0ea" }}>
+                {modelDimensions}
               </div>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 700, color: "#f3f0ea" }}>
-                  {modelGrossArea}
-                </div>
-                <div style={{ marginTop: 6, fontSize: isMobile ? 12 : 13, color: "#b7ab9a" }}>
-                  {t.grossArea}
-                </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 700, color: "#f3f0ea" }}>
-                  {height}
-                </div>
-                <div style={{ marginTop: 6, fontSize: isMobile ? 12 : 13, color: "#b7ab9a" }}>
-                  {t.height}
-                </div>
+              <div style={{ marginTop: 6, fontSize: isMobile ? 12 : 13, color: "#b7ab9a" }}>
+                {t.dimensions}
               </div>
             </div>
-    )}  </div>                                     
 
-          {false && (
-  <section
-  style={{
-    background: "#17181b",
-    border: "1px solid #2a2c31",
-    borderRadius: 22,
-    padding: 10,
-    marginBottom: 16,
-  }}
->
-  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-    <button
-      onClick={() => setIsSalesMode(false)}
-      style={{
-        borderRadius: 16,
-        padding: "12px 14px",
-        border: !isSalesMode ? "1px solid #b79e84" : "1px solid #2a2c31",
-        background: !isSalesMode ? "#b79e84" : "#1c1d21",
-        color: !isSalesMode ? "#111214" : "#f3f0ea",
-        fontWeight: 700,
-        fontSize: 14,
-        cursor: "pointer",
-      }}
-    >
-      {t.public}
-    </button>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 700, color: "#f3f0ea" }}>
+                {modelGrossArea}
+              </div>
+              <div style={{ marginTop: 6, fontSize: isMobile ? 12 : 13, color: "#b7ab9a" }}>
+                {t.grossArea}
+              </div>
+            </div>
 
-    <button
-      onClick={() => setIsSalesMode(true)}
-      style={{
-        borderRadius: 16,
-        padding: "12px 14px",
-        border: isSalesMode ? "1px solid #b79e84" : "1px solid #2a2c31",
-        background: isSalesMode ? "#b79e84" : "#1c1d21",
-        color: isSalesMode ? "#111214" : "#f3f0ea",
-        fontWeight: 700,
-        fontSize: 14,
-        cursor: "pointer",
-      }}
-    >
-     {t.commercialist}
-    </button>
-  </div>
-</section>
-)}
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: isMobile ? 20 : 28, fontWeight: 700, color: "#f3f0ea" }}>
+                {height}
+              </div>
+              <div style={{ marginTop: 6, fontSize: isMobile ? 12 : 13, color: "#b7ab9a" }}>
+                {t.height}
+              </div>
+            </div>
+          </div>
+        </div>
 
-
-       {isSalesMode && (
-          <section style={{ background: "#17181b", border: "1px solid #2a2c31", borderRadius: 28, padding: 22, marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 700 }}>{t.offerDetails}</h2>
+        {isSalesMode && (
+          <section
+            style={{
+              background: "#17181b",
+              border: "1px solid #2a2c31",
+              borderRadius: 28,
+              padding: 22,
+              marginBottom: 16,
+            }}
+          >
+            <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 700 }}>
+              {t.offerDetails}
+            </h2>
 
             <div style={{ display: "grid", gap: 14, marginTop: 18 }}>
               {[
@@ -1237,111 +1214,64 @@ ${shareUrl}
                 </div>
               ))}
 
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#b7ab9a", marginBottom: 8 }}>
-                  {t.shareLink}
-                </div>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  marginTop: 8,
+                  color: "#f3f0ea",
+                  fontSize: 15,
+                  fontWeight: 600,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={includeDeliveryAssembly}
+                  onChange={(e) => setIncludeDeliveryAssembly(e.target.checked)}
+                />
+                Include delivery and assembly
+              </label>
 
-                <div
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <button
+                  onClick={exportTxt}
                   style={{
-                    width: "100%",
                     borderRadius: 16,
                     border: "1px solid #2a2c31",
                     background: "#1c1d21",
-                    padding: "16px 18px",
-                    fontSize: 16,
                     color: "#f3f0ea",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    padding: "14px 18px",
+                    fontSize: 15,
+                    fontWeight: 600,
+                    cursor: "pointer",
                   }}
                 >
-                  {shareUrl ? `${shareUrl.split("?")[0]}?...` : ""}
-                </div>
+                  {t.exportTxt}
+                </button>
 
-                <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
-                  <button
-                    onClick={copyShareLink}
-                    style={{
-                      borderRadius: 16,
-                      border: "1px solid #2a2c31",
-                      background: "#1c1d21",
-                      color: "#f3f0ea",
-                      padding: "14px 18px",
-                      fontSize: 15,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {copied ? t.copied : t.copyFullLink}
-                  </button>
-
-                  <button
-                    onClick={exportTxt}
-                    style={{
-                      borderRadius: 16,
-                      border: "1px solid #2a2c31",
-                      background: "#1c1d21",
-                      color: "#f3f0ea",
-                      padding: "14px 18px",
-                      fontSize: 15,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {t.exportTxt}
-                  </button>
-
-                  <button
-                    onClick={exportPdf}
-                    style={{
-                      borderRadius: 16,
-                      border: "1px solid #b79e84",
-                      background: "#b79e84",
-                      color: "#111214",
-                      padding: "14px 18px",
-                      fontSize: 15,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {t.exportPdf}
-                  </button>
-                </div>
+                <button
+                  onClick={exportPdf}
+                  style={{
+                    borderRadius: 16,
+                    border: "1px solid #b79e84",
+                    background: "#b79e84",
+                    color: "#111214",
+                    padding: "14px 18px",
+                    fontSize: 15,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  {t.exportPdf}
+                </button>
               </div>
             </div>
           </section>
-       )}
-       
+        )}
 
-          {model.categories.map((category: Category) => {
-            if ("options" in category) {
-              return (
-                <section
-                  key={category.id}
-                  style={{
-                    background: "#17181b",
-                    border: "1px solid #2a2c31",
-                    borderRadius: 28,
-                    padding: 22,
-                    marginBottom: 16,
-                  }}
-                >
-                  <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 700 }}>{translateLabel(category.name)}</h2>
-
-                  {renderGroupByType(
-                    category.id,
-                    category.options.values as Record<string, OptionValue>,
-                    config[category.id],
-                    (key) => {
-                      updateConfig(category.id, key);
-                      setViewMode(getViewModeForSection(category.id));
-                    }
-                  )}
-                </section>
-              );
-            }
-
+        {model.categories.map((category: Category) => {
+          if ("options" in category) {
             return (
               <section
                 key={category.id}
@@ -1353,282 +1283,317 @@ ${shareUrl}
                   marginBottom: 16,
                 }}
               >
-                <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 700 }}>{translateLabel(category.name)}</h2>
+                <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 700 }}>
+                  {translateLabel(category.name)}
+                </h2>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: 26, marginTop: 18 }}>
-                  {category.subcategories.map((subcategory: Subcategory) => {
-                    const visible = isOptionGroupVisible(modelKey, config, subcategory.id);
-                    if (!visible) return null;
-
-                    return (
-                      <div key={subcategory.id}>
-                        <h3 style={{ margin: 0, fontSize: isMobile ? 18 : 20, fontWeight: 700, color: "#f3f0ea" }}>
-                          {translateLabel(subcategory.name)}
-                        </h3>
-
-                        {renderGroupByType(
-                          subcategory.id,
-                          subcategory.options.values as Record<string, OptionValue>,
-                          config[subcategory.id],
-                          (key) => {
-                            updateConfig(subcategory.id, key);
-                            setViewMode(getViewModeForSection(category.id, subcategory.id));
-                          }
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                {renderGroupByType(
+                  category.id,
+                  category.options.values as Record<string, OptionValue>,
+                  config[category.id],
+                  (key) => {
+                    updateConfig(category.id, key);
+                    setViewMode(getViewModeForSection(category.id));
+                  }
+                )}
               </section>
             );
-          })}
+          }
 
-          <section style={{ background: "#17181b", border: "1px solid #2a2c31", borderRadius: 28, padding: 22, marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 700 }}>{t.summary}</h2>
-
-            <div
+          return (
+            <section
+              key={category.id}
               style={{
-                marginTop: 14,
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-                color: "#d8d0c6",
-                fontSize: 15,
-                lineHeight: 1.45,
-              }}
-            >
-              {breakdown
-  .filter((item) => item.label !== "Base")
-  .map((item, index) => {
-    const match = item.label.match(/^(.+?) \((.+)\)$/);
-
-    if (!match) return <div key={index}>{translateLabel(item.label)}</div>;
-
-    const [, group, option] = match;
-
-    return (
-      <div key={index}>
-        {translateLabel(group)} ({translateLabel(option)})
-      </div>
-    );
-  })}
-            </div>
-
-            <button
-              onClick={() => setBreakdownOpen((prev) => !prev)}
-              style={{
-                width: "100%",
-                marginTop: 18,
-                borderRadius: 18,
+                background: "#17181b",
                 border: "1px solid #2a2c31",
-                background: "#1c1d21",
-                color: "#f3f0ea",
-                padding: "16px 18px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                cursor: "pointer",
-                fontSize: 16,
-                fontWeight: 700,
+                borderRadius: 28,
+                padding: 22,
+                marginBottom: 16,
               }}
             >
-              <span>{t.showPricingBreakdown}</span>
-              <span style={{ fontSize: 22, lineHeight: 1, color: "#b79e84" }}>
-                {breakdownOpen ? "▴" : "▾"}
-              </span>
-            </button>
+              <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 700 }}>
+                {translateLabel(category.name)}
+              </h2>
 
-            {breakdownOpen && (
-              <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-                {breakdown.map((item, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      fontSize: 15,
-                      color: "#d8d0c6",
-                    }}
-                  >
-                    <span>
-  {(() => {
-    if (item.label === "Base") return t.base;
-
-    const match = item.label.match(/^(.+?) \((.+)\)$/);
-
-    if (!match) return translateLabel(item.label);
-
-    const [, group, option] = match;
-
-    return `${translateLabel(group)} (${translateLabel(option)})`;
-  })()}
-</span>
-                    <span>{item.value === 0 ? t.included : priceLabel(item.value)}</span>
-                  </div>
-                ))}
-
-                <div style={{ height: 1, background: "#2a2c31", margin: "8px 0" }} />
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontSize: 17,
-                    fontWeight: 700,
-                    color: "#f3f0ea",
-                  }}
-                >
-                  <span>{t.finalTotal}</span>
-                  <span>€{finalTotalFormatted}</span>
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
-
-        {!isMobile && (
-          <div
-            style={{
-              position: "sticky",
-              top: 0,
-              height: "100vh",
-              background: "#121316",
-              display: "flex",
-              flexDirection: "column",
-              order: 2,
-            }}
-          >
-            <div
-              style={{
-                position: "relative",
-                flex: 1,
-                minHeight: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  top: 20,
-                  right: 20,
-                  zIndex: 20,
-                  display: "flex",
-                  gap: 8,
-                  padding: 8,
-                  borderRadius: 18,
-                  background: "rgba(23,24,27,0.82)",
-                  border: "1px solid #2a2c31",
-                  backdropFilter: "blur(10px)",
-                }}
-              >
-                {[
-                  { id: "exterior", label: t.exterior },
-                  { id: "interior", label: t.interior },
-                  { id: "bathroom", label: t.bathroom },
-                ].map((item) => {
-                  const active = viewMode === item.id;
+              <div style={{ display: "flex", flexDirection: "column", gap: 26, marginTop: 18 }}>
+                {category.subcategories.map((subcategory: Subcategory) => {
+                  const visible = isOptionGroupVisible(modelKey, config, subcategory.id);
+                  if (!visible) return null;
 
                   return (
-                    <button
-                      key={item.id}
-                      onClick={() => setViewMode(item.id as typeof viewMode)}
-                      style={{
-                        borderRadius: 14,
-                        padding: "10px 14px",
-                        border: active ? "1px solid #b79e84" : "1px solid transparent",
-                        background: active ? "#b79e84" : "transparent",
-                        color: active ? "#111214" : "#f3f0ea",
-                        fontWeight: 700,
-                        fontSize: 13,
-                        cursor: "pointer",
-                      }}
-                    >
-                      {translateLabel(item.label)}
-                    </button>
+                    <div key={subcategory.id}>
+                      <h3 style={{ margin: 0, fontSize: isMobile ? 18 : 20, fontWeight: 700, color: "#f3f0ea" }}>
+                        {translateLabel(subcategory.name)}
+                      </h3>
+
+                      {renderGroupByType(
+                        subcategory.id,
+                        subcategory.options.values as Record<string, OptionValue>,
+                        config[subcategory.id],
+                        (key) => {
+                          updateConfig(subcategory.id, key);
+                          setViewMode(getViewModeForSection(category.id, subcategory.id));
+                        }
+                      )}
+                    </div>
                   );
                 })}
               </div>
+            </section>
+          );
+        })}
 
-              <ModelViewer
-                modelPath={model.glb}
-                terrace={config.terrace}
-                facade={config.facade}
-                terraceCladding={config.terrace_floor}
-                windowType={config.windows_type}
-                windowColor={config.windows_color}
-                exteriorDoor={config.exterior_door}
-                viewMode={viewMode}
-                mansard={config.mansard}
-                floorCladding={config.floor_cladding}
-                staircase={config.staircase}
-                interiorWall={config.interior_wall}
-                roofType={config.roof_type}
-                roofColor={config.roof_color}
-                bathroomWalls={config.bathroom_walls}
-                bathroom={config.bathroom}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div
-        style={{
-          position: "fixed",
-          left: 0,
-          bottom: 0,
-          width: "100%",
-          zIndex: 30,
-          background: "rgba(17,18,20,0.92)",
-          backdropFilter: "blur(14px)",
-          borderTop: "1px solid #2a2c31",
-        }}
-      >
-        <div
+        <section
           style={{
-            width: "100%",
-            maxWidth: 1480,
-            margin: "0 auto",
-            padding: isMobile ? "12px 14px 14px" : "14px 22px 18px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 16,
+            background: "#17181b",
+            border: "1px solid #2a2c31",
+            borderRadius: 28,
+            padding: 22,
+            marginBottom: 16,
           }}
         >
-          <div>
-            <div style={{ fontSize: 14, color: "#b7ab9a", marginBottom: 6 }}>{t.finalTotal}</div>
-            <div
-              style={{
-                fontSize: isMobile ? 30 : 40,
-                lineHeight: 1,
-                fontWeight: 700,
-                letterSpacing: "-0.04em",
-                color: "#b79e84",
-              }}
-            >
-              €{finalTotalFormatted}
-            </div>
+          <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 26, fontWeight: 700 }}>
+            {t.summary}
+          </h2>
+
+          <div
+            style={{
+              marginTop: 14,
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              color: "#d8d0c6",
+              fontSize: 15,
+              lineHeight: 1.45,
+            }}
+          >
+            {breakdown
+              .filter((item) => item.label !== "Base")
+              .map((item, index) => {
+                const match = item.label.match(/^(.+?) \((.+)\)$/);
+
+                if (!match) return <div key={index}>{translateLabel(item.label)}</div>;
+
+                const [, group, option] = match;
+
+                return (
+                  <div key={index}>
+                    {translateLabel(group)} ({translateLabel(option)})
+                  </div>
+                );
+              })}
           </div>
 
           <button
-            onClick={exportPdf}
+            onClick={() => setBreakdownOpen((prev) => !prev)}
             style={{
+              width: "100%",
+              marginTop: 18,
               borderRadius: 18,
-              border: "1px solid #b79e84",
-              background: "#b79e84",
-              color: "#111214",
-              padding: isMobile ? "14px 18px" : "18px 24px",
-              fontSize: isMobile ? 14 : 16,
-              fontWeight: 700,
+              border: "1px solid #2a2c31",
+              background: "#1c1d21",
+              color: "#f3f0ea",
+              padding: "16px 18px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               cursor: "pointer",
-              minWidth: isMobile ? 140 : 190,
+              fontSize: 16,
+              fontWeight: 700,
             }}
           >
-            {isSalesMode ? t.exportOffer : t.requestQuote}
+            <span>{t.showPricingBreakdown}</span>
+            <span style={{ fontSize: 22, lineHeight: 1, color: "#b79e84" }}>
+              {breakdownOpen ? "▴" : "▾"}
+            </span>
           </button>
-        </div>
+
+          {breakdownOpen && (
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+              {breakdown.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    fontSize: 15,
+                    color: "#d8d0c6",
+                  }}
+                >
+                  <span>
+                    {(() => {
+                      if (item.label === "Base") return t.base;
+
+                      const match = item.label.match(/^(.+?) \((.+)\)$/);
+
+                      if (!match) return translateLabel(item.label);
+
+                      const [, group, option] = match;
+
+                      return `${translateLabel(group)} (${translateLabel(option)})`;
+                    })()}
+                  </span>
+                  <span>{item.value === 0 ? t.included : priceLabel(item.value)}</span>
+                </div>
+              ))}
+
+              <div style={{ height: 1, background: "#2a2c31", margin: "8px 0" }} />
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 17,
+                  fontWeight: 700,
+                  color: "#f3f0ea",
+                }}
+              >
+                <span>{t.finalTotal}</span>
+                <span>€{finalTotalFormatted}</span>
+              </div>
+            </div>
+          )}
+        </section>
       </div>
-    </main>
-  );
-}
+
+      {!isMobile && (
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            height: "100vh",
+            background: "#121316",
+            display: "flex",
+            flexDirection: "column",
+            order: 2,
+          }}
+        >
+          <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
+            <div
+              style={{
+                position: "absolute",
+                top: 20,
+                right: 20,
+                zIndex: 20,
+                display: "flex",
+                gap: 8,
+                padding: 8,
+                borderRadius: 18,
+                background: "rgba(23,24,27,0.82)",
+                border: "1px solid #2a2c31",
+                backdropFilter: "blur(10px)",
+              }}
+            >
+              {[
+                { id: "exterior", label: t.exterior },
+                { id: "interior", label: t.interior },
+                { id: "bathroom", label: t.bathroom },
+              ].map((item) => {
+                const active = viewMode === item.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setViewMode(item.id as typeof viewMode)}
+                    style={{
+                      borderRadius: 14,
+                      padding: "10px 14px",
+                      border: active ? "1px solid #b79e84" : "1px solid transparent",
+                      background: active ? "#b79e84" : "transparent",
+                      color: active ? "#111214" : "#f3f0ea",
+                      fontWeight: 700,
+                      fontSize: 13,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {translateLabel(item.label)}
+                  </button>
+                );
+              })}
+            </div>
+
+            <ModelViewer
+              modelPath={model.glb}
+              terrace={config.terrace}
+              facade={config.facade}
+              terraceCladding={config.terrace_floor}
+              windowType={config.windows_type}
+              windowColor={config.windows_color}
+              exteriorDoor={config.exterior_door}
+              viewMode={viewMode}
+              mansard={config.mansard}
+              floorCladding={config.floor_cladding}
+              staircase={config.staircase}
+              interiorWall={config.interior_wall}
+              roofType={config.roof_type}
+              roofColor={config.roof_color}
+              bathroomWalls={config.bathroom_walls}
+              bathroom={config.bathroom}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div
+      style={{
+        position: "fixed",
+        left: 0,
+        bottom: 0,
+        width: "100%",
+        zIndex: 30,
+        background: "rgba(17,18,20,0.92)",
+        backdropFilter: "blur(14px)",
+        borderTop: "1px solid #2a2c31",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 1480,
+          margin: "0 auto",
+          padding: isMobile ? "12px 14px 14px" : "14px 22px 18px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 16,
+        }}
+      >
+        <div>
+          <div style={{ fontSize: 14, color: "#b7ab9a", marginBottom: 6 }}>
+            {t.finalTotal}
+          </div>
+          <div
+            style={{
+              fontSize: isMobile ? 30 : 40,
+              lineHeight: 1,
+              fontWeight: 700,
+              letterSpacing: "-0.04em",
+              color: "#b79e84",
+            }}
+          >
+            €{finalTotalFormatted}
+          </div>
+        </div>
+
+        <button
+          onClick={exportPdf}
+          style={{
+            borderRadius: 18,
+            border: "1px solid #b79e84",
+            background: "#b79e84",
+            color: "#111214",
+            padding: isMobile ? "14px 18px" : "18px 24px",
+            fontSize: isMobile ? 14 : 16,
+            fontWeight: 700,
+            cursor: "pointer",
+            minWidth: isMobile ? 140 : 190,
+          }}
+        >
+          {isSalesMode ? t.exportOffer : t.requestQuote}
+        </button>
+      </div>
+    </div>
+  </main>
+); }

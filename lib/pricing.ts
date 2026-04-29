@@ -50,19 +50,25 @@ function flattenGroups(modelKey: ModelKey): FlatGroup[] {
 }
 
 function getOptionPrice(
+  modelKey: ModelKey,
   groupId: string,
   optionKey: string,
-  fallbackPrice: number,
   priceMap?: PriceMap
 ): number {
-  if (!priceMap) return fallbackPrice;
+  if (!priceMap) {
+    console.warn(`Price map not loaded yet: ${modelKey}.${groupId}.${optionKey}`);
+    return 0;
+  }
 
-  const csvKey = `${groupId}.${optionKey}`;
+  const csvKey = `${modelKey}.${groupId}.${optionKey}`;
   const csvPrice = priceMap[csvKey];
 
-  return typeof csvPrice === "number" && !Number.isNaN(csvPrice)
-    ? csvPrice
-    : fallbackPrice;
+  if (typeof csvPrice === "number" && !Number.isNaN(csvPrice)) {
+    return csvPrice;
+  }
+
+  console.warn(`Missing CSV price: ${csvKey}`);
+  return 0;
 }
 
 export function isOptionGroupVisible(
@@ -98,7 +104,7 @@ export function calculatePrice(
     const option = group.options.values[selectedKey];
     if (!option) return;
 
-    total += getOptionPrice(group.id, selectedKey, option.price, priceMap);
+    total += getOptionPrice(modelKey, group.id, selectedKey, priceMap);
   });
 
   return total;
@@ -112,9 +118,7 @@ export function getBreakdown(
   const model = models[modelKey];
   const groups = flattenGroups(modelKey);
 
-  const breakdown: BreakdownItem[] = [
-    { label: "Base", value: model.basePrice },
-  ];
+  const breakdown: BreakdownItem[] = [{ label: "Base", value: model.basePrice }];
 
   groups.forEach((group) => {
     if (!isOptionGroupVisible(modelKey, config, group.id)) return;
@@ -127,7 +131,7 @@ export function getBreakdown(
 
     breakdown.push({
       label: `${group.name} (${option.label})`,
-      value: getOptionPrice(group.id, selectedKey, option.price, priceMap),
+      value: getOptionPrice(modelKey, group.id, selectedKey, priceMap),
     });
   });
 
