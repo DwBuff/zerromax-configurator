@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "../../../lib/supabase";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
