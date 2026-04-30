@@ -9,6 +9,9 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
 
+  console.log("SUPABASE URL:", process.env.SUPABASE_URL);
+  console.log("SUPABASE KEY:", process.env.SUPABASE_ANON_KEY?.slice(0, 10));
+
   try {
     const body = await request.json();
 
@@ -170,7 +173,7 @@ console.log("IMAGE URL:", imageUrl);
               </a>
 
               <!-- SECONDARY -->
-              <a href="mailto:sales@zerromax.com"
+              <a href="mailto:info@zerromax.com"
                  style="
                    display:block;
                    width:100%;
