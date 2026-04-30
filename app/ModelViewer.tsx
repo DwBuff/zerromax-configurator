@@ -1,7 +1,7 @@
 "use client";
 
 import * as THREE from "three";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
 import { useEffect, useRef } from "react";
 
@@ -9,6 +9,18 @@ type GLTFResult = {
   scene: THREE.Group;
   materials: Record<string, THREE.Material>;
 };
+
+let globalCanvas: HTMLCanvasElement | null = null;
+
+function Capture() {
+  const { gl } = useThree();
+
+  useEffect(() => {
+    globalCanvas = gl.domElement;
+  }, [gl]);
+
+  return null;
+}
 
 function HouseModel({
   modelPath,
@@ -422,6 +434,8 @@ function CameraControls({
   );
 }
 
+
+
 export default function ModelViewer({
   modelPath,
   terrace,
@@ -459,7 +473,11 @@ export default function ModelViewer({
 }) {
   return (
     <div style={{ width: "100%", height: "100%" }}>
-      <Canvas camera={{ position: [10, 3, 8], fov: 45 }}>
+      <Canvas gl={{ preserveDrawingBuffer: true }} camera={{ position: [10, 3, 8], fov: 45 }}>
+        
+        {/* 🔥 THIS LINE FIXES IMAGE CAPTURE */}
+        <Capture />
+
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 10, 5]} intensity={1.2} castShadow />
         <directionalLight position={[-5, 5, -5]} intensity={0.5} />
@@ -486,4 +504,10 @@ export default function ModelViewer({
       </Canvas>
     </div>
   );
+}
+
+export function captureImage() {
+  if (!globalCanvas) return null;
+
+  return globalCanvas.toDataURL("image/png");
 }

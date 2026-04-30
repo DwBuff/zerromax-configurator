@@ -105,7 +105,7 @@ console.log("IMAGE URL:", imageUrl);
     <img 
       src="${imageUrl}"
       alt="Your design"
-      style="width:100%;max-width:420px;border-radius:10px;"
+      style="width:100%;max-width:520px;border-radius:10px;"
     />
   </td>
 </tr>

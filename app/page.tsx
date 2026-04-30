@@ -4,6 +4,7 @@ import Papa from "papaparse";
 import { useEffect, useMemo, useState } from "react";
 import { jsPDF } from "jspdf";
 
+import { captureImage } from "./ModelViewer";
 import ModelViewer from "./ModelViewer";
 import { models, type ModelKey, type Category, type Subcategory } from "../data/models";
 import {
@@ -54,7 +55,7 @@ const translations = {
     showPricingBreakdown: "Show pricing breakdown",
     finalTotal: "Final total",
     exportOffer: "Export Offer",
-    requestQuote: "Request Quote",
+    requestQuote: "Save design",
     included: "Included",
     exterior: "Exterior",
     interior: "Interior",
@@ -87,7 +88,7 @@ const translations = {
     showPricingBreakdown: "Prikaži razčlenitev cene",
     finalTotal: "Končna cena",
     exportOffer: "Izvozi ponudbo",
-    requestQuote: "Pošlji povpraševanje",
+    requestQuote: "Shrani dizajn",
     included: "Vključeno",
     exterior: "Zunanjost",
     interior: "Notranjost",
@@ -190,6 +191,14 @@ export default function Home() {
   const [language, setLanguage] = useState<"en" | "sl">("en");
 const t = translations[language];
 
+const captureImage = () => {
+  const canvas = document.querySelector("canvas");
+
+  if (!canvas) return null;
+
+  return canvas.toDataURL("image/png");
+};
+
 const [isSalesPath, setIsSalesPath] = useState(false);
 useEffect(() => {
   const salesPath = window.location.pathname.startsWith("/sales");
@@ -202,6 +211,19 @@ const translateLabel = (label: string) => {
   if (language === "en") return label;
   return labelTranslations[language]?.[label] || label;
 };
+
+
+const [showSaveModal, setShowSaveModal] = useState(false);
+
+const [leadFirstName, setLeadFirstName] = useState("");
+const [leadLastName, setLeadLastName] = useState("");
+const [leadEmail, setLeadEmail] = useState("");
+const [leadPhone, setLeadPhone] = useState("");
+
+const [newsletterConsent, setNewsletterConsent] = useState(false);
+
+const [isSendingDesign, setIsSendingDesign] = useState(false);
+const [saveDesignMessage, setSaveDesignMessage] = useState("");
 
 const [includeDeliveryAssembly, setIncludeDeliveryAssembly] = useState(false);
 
@@ -937,6 +959,58 @@ ${shareUrl}
     return renderOptionGroup(groupId, values, selectedValue, onSelect);
   };
 
+  const handleSaveDesign = async () => {
+ await new Promise(requestAnimationFrame);
+await new Promise(requestAnimationFrame);
+
+const image = captureImage();
+  console.log(image?.slice(0, 50));
+
+  if (!leadEmail.trim()) {
+    setSaveDesignMessage("Please enter your email.");
+    return;
+  }
+
+  setIsSendingDesign(true);
+  setSaveDesignMessage("");
+
+  try {
+    const summary = breakdown
+      .filter((item) => item.label !== "Base")
+      .map((item) => item.label);
+
+    const response = await fetch("/api/save-design", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName: leadFirstName,
+        lastName: leadLastName,
+        email: leadEmail,
+        phone: leadPhone,
+        newsletterConsent,
+        model: modelDisplayName,
+        finalTotal: finalTotalFormatted,
+        summary,
+        image,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to send design.");
+    }
+
+    setSaveDesignMessage("Design sent successfully.");
+    setShowSaveModal(false);
+  } catch (error) {
+    console.error(error);
+    setSaveDesignMessage("Something went wrong.");
+  } finally {
+    setIsSendingDesign(false);
+  }
+};
+
   if (!mounted) return null;
 
 return (
@@ -1578,22 +1652,222 @@ return (
         </div>
 
         <button
-          onClick={exportPdf}
-          style={{
-            borderRadius: 18,
-            border: "1px solid #b79e84",
-            background: "#b79e84",
-            color: "#111214",
-            padding: isMobile ? "14px 18px" : "18px 24px",
-            fontSize: isMobile ? 14 : 16,
-            fontWeight: 700,
-            cursor: "pointer",
-            minWidth: isMobile ? 140 : 190,
-          }}
+  onClick={() => setShowSaveModal(true)}
+  style={{
+    borderRadius: 18,
+    background: "#b79e84",
+    color: "#111214",
+    padding: "18px 24px",
+    fontWeight: 700,
+    cursor: "pointer",
+  }}
         >
           {isSalesMode ? t.exportOffer : t.requestQuote}
         </button>
       </div>
     </div>
+{showSaveModal && (
+  <div
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.72)",
+      zIndex: 9999,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: isMobile ? 14 : 28,
+      backdropFilter: "blur(12px)",
+    }}
+  >
+    <div
+      style={{
+        width: "100%",
+        maxWidth: 980,
+        background: "linear-gradient(145deg, #17181b 0%, #111214 100%)",
+        border: "1px solid #2a2c31",
+        borderRadius: 28,
+        padding: isMobile ? 24 : 46,
+        color: "#f3f0ea",
+        position: "relative",
+        boxShadow: "0 24px 80px rgba(0,0,0,0.55)",
+      }}
+    >
+      <button
+        onClick={() => setShowSaveModal(false)}
+        style={{
+          position: "absolute",
+          top: 18,
+          right: 18,
+          width: 46,
+          height: 46,
+          borderRadius: "50%",
+          border: "1px solid #3a3d44",
+          background: "#1c1d21",
+          color: "#f3f0ea",
+          fontSize: 30,
+          cursor: "pointer",
+          lineHeight: 1,
+        }}
+      >
+        ×
+      </button>
+
+      <h1
+        style={{
+          margin: 0,
+          fontSize: isMobile ? 38 : 64,
+          lineHeight: 1,
+          fontWeight: 800,
+          letterSpacing: "-0.05em",
+        }}
+      >
+        Save your design
+      </h1>
+
+      <p
+        style={{
+          marginTop: 14,
+          marginBottom: 34,
+          fontSize: isMobile ? 18 : 24,
+          color: "#b7ab9a",
+        }}
+      >
+        Send your configuration to your email
+      </p>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: 20,
+        }}
+      >
+        {[
+          {
+            label: "First name",
+            value: leadFirstName,
+            onChange: setLeadFirstName,
+            placeholder: "First name",
+            type: "text",
+          },
+          {
+            label: "Last name",
+            value: leadLastName,
+            onChange: setLeadLastName,
+            placeholder: "Last name",
+            type: "text",
+          },
+          {
+            label: "Phone number",
+            value: leadPhone,
+            onChange: setLeadPhone,
+            placeholder: "+386 31 234 567",
+            type: "tel",
+          },
+          {
+            label: "Email",
+            value: leadEmail,
+            onChange: setLeadEmail,
+            placeholder: "Email address",
+            type: "email",
+          },
+        ].map((field) => (
+          <div key={field.label}>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#b7ab9a",
+                marginBottom: 8,
+              }}
+            >
+              {field.label}
+            </div>
+
+            <input
+              type={field.type}
+              value={field.value}
+              onChange={(e) => field.onChange(e.target.value)}
+              placeholder={field.placeholder}
+              style={{
+                width: "100%",
+                height: 58,
+                borderRadius: 16,
+                border: "1px solid #3a3d44",
+                background: "#1c1d21",
+                color: "#f3f0ea",
+                padding: "0 16px",
+                fontSize: 17,
+                outline: "none",
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          marginTop: 28,
+          fontSize: 17,
+          color: "#f3f0ea",
+          cursor: "pointer",
+        }}
+      >
+        <input
+          type="checkbox"
+          checked={newsletterConsent}
+          onChange={(e) => setNewsletterConsent(e.target.checked)}
+          style={{
+            width: 22,
+            height: 22,
+            accentColor: "#b79e84",
+            cursor: "pointer",
+          }}
+        />
+        Receive updates and news
+      </label>
+
+      <p
+        style={{
+          marginTop: 10,
+          fontSize: 14,
+          lineHeight: 1.45,
+          color: "#8f887f",
+        }}
+      >
+        You can unsubscribe at any time.
+      </p>
+
+      <button
+         onClick={handleSaveDesign}
+  disabled={isSendingDesign}
+  style={{
+          width: "100%",
+          marginTop: 34,
+          height: 64,
+          borderRadius: 18,
+          border: "1px solid #b79e84",
+          background: "#b79e84",
+          color: "#111214",
+          fontSize: 20,
+          fontWeight: 800,
+          cursor: "pointer",
+        }}
+      >
+        {isSendingDesign ? "Sending..." : "Send"}
+      </button>
+      {saveDesignMessage && (
+  <div style={{ marginTop: 14, color: "#b79e84", fontWeight: 700 }}>
+    {saveDesignMessage}
+  </div>
+)}
+    </div>
+  </div>
+)}
+
   </main>
 ); }
