@@ -63,18 +63,12 @@ const { data, error } = await supabase
   .from("leads")
   .insert([
     {
-      first_name: firstName || null,
-      last_name: lastName || null,
-      email,
-      phone: phone || null,
-      newsletter: newsletterConsent || false,
-      model,
-      final_total: finalTotal ? Number(finalTotal) : null,
-      summary: Array.isArray(summary) ? summary.join(", ") : null,
-      image_url: imageUrl,
+      email: "test@test.com",
     },
   ])
   .select();
+
+console.log("TEST INSERT:", data, error);
 
 // 🔥 ADD THIS (you probably missed this step)
 console.log("SUPABASE DATA:", data);
