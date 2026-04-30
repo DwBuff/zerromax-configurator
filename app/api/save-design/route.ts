@@ -49,6 +49,15 @@ if (image) {
   imageUrl = blob.url;
 }
 
+// 🔍 DEBUG: test connection / role
+const { data: test, error: testError } = await supabase
+  .from("leads")
+  .select("email")
+  .limit(1);
+
+console.log("SELECT TEST:", test);
+console.log("SELECT ERROR:", testError);
+
 // 2️⃣ THEN insert ONCE
 const { data, error } = await supabase
   .from("leads")
