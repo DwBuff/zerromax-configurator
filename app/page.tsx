@@ -75,8 +75,8 @@ const translations = {
     email: "Email",
     send: "Send",
     sending: "Sending...",
-    receiveUpdates: "{t.receiveUpdates}",
-    unsubscribeNote: "{t.unsubscribeNote}",
+    receiveUpdates: "Receive updates and news",
+    unsubscribeNote: "You can unsubscribe at any time.",
   },
   sl: {
     public: "Javno",
