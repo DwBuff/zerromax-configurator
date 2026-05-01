@@ -66,6 +66,17 @@ const translations = {
     notSpecified: "Not specified",
     model: "Model",
     productBreakdown: "Product breakdown",
+
+    saveDesignTitle: "Save your design",
+    saveDesignSubtitle: "Send your configuration to your email",
+    firstName: "First name",
+    lastName: "Last name",
+    phone: "Phone number",
+    email: "Email",
+    send: "Send",
+    sending: "Sending...",
+    receiveUpdates: "{t.receiveUpdates}",
+    unsubscribeNote: "{t.unsubscribeNote}",
   },
   sl: {
     public: "Javno",
@@ -100,21 +111,32 @@ const translations = {
     notSpecified: "Ni določeno",
     model: "Model",
     productBreakdown: "Razčlenitev izdelka",
+
+    saveDesignTitle: "Shrani svoj dizajn",
+    saveDesignSubtitle: "Pošlji konfiguracijo na svoj email",
+    firstName: "Ime",
+    lastName: "Priimek",
+    phone: "Telefon",
+    email: "Email",
+    send: "Pošlji",
+    sending: "Pošiljanje...",
+    receiveUpdates: "Prejemaj novosti in obvestila",
+    unsubscribeNote: "Kadarkoli se lahko odjaviš.",
   },
 };
 
 const labelTranslations: Record<string, Record<string, string>> = {
   sl: {
-    "Floor Construction": "Talna konstrukcija",
+    "Floor Construction": "Konstrukcija tal",
     "Construction": "Konstrukcija",
     "Exterior": "Zunanjost",
     "Interior": "Notranjost",
     "Equipment": "Oprema",
 
     "Facade": "Fasada",
-    "Exterior Door": "Zunanja vrata",
+    "Exterior Door": "Vhodna vrata",
     "Canopy": "Nadstrešek",
-    "Terrace Floor": "Tlak terase",
+    "Terrace Floor": "Tla terase",
     "Window Type": "Tip oken",
     "Window Color": "Barva oken",
     "Roof Type": "Tip strehe",
@@ -977,7 +999,15 @@ const image = captureImage();
   try {
     const summary = breakdown
       .filter((item) => item.label !== "Base")
-      .map((item) => item.label);
+      .map((item) => {
+  const match = item.label.match(/^(.+?) \((.+)\)$/);
+
+  if (!match) return translateLabel(item.label);
+
+  const [, group, option] = match;
+
+  return `${translateLabel(group)} (${translateLabel(option)})`;
+});
 
     const response = await fetch("/api/save-design", {
       method: "POST",
@@ -994,6 +1024,7 @@ const image = captureImage();
         finalTotal: finalTotalFormatted,
         summary,
         image,
+        language,
       }),
     });
 
@@ -1400,15 +1431,83 @@ return (
                         {translateLabel(subcategory.name)}
                       </h3>
 
-                      {renderGroupByType(
-                        subcategory.id,
-                        subcategory.options.values as Record<string, OptionValue>,
-                        config[subcategory.id],
-                        (key) => {
-                          updateConfig(subcategory.id, key);
-                          setViewMode(getViewModeForSection(category.id, subcategory.id));
-                        }
-                      )}
+                     {subcategory.id === "knee_wall" ? (
+  <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 18 }}>
+    {Object.entries(subcategory.options.values).map(([key, option]) => {
+      const selected = config.knee_wall === key;
+
+      // ✅ THIS WAS MISSING
+      const optionPrice = getDisplayPrice("knee_wall", key);
+
+      return (
+        <button
+          key={key}
+          onClick={() => {
+            updateConfig("knee_wall", key);
+            setViewMode(getViewModeForSection(category.id, subcategory.id));
+          }}
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "16px 22px",
+            borderRadius: 24,
+            border: selected
+              ? "2px solid #b79e84"
+              : "1px solid #2a2c31",
+            background: "#17181b",
+            cursor: "pointer",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            <div
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: "50%",
+                border: selected
+                  ? "8px solid #b79e84"
+                  : "2px solid #444",
+                background: selected ? "#111214" : "transparent",
+              }}
+            />
+
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: "#f3f0ea",
+              }}
+            >
+              {translateLabel(option.label)}
+            </div>
+          </div>
+
+          <div
+            style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: "#d0b08c",
+            }}
+          >
+            {optionPrice === 0 ? t.included : priceLabel(optionPrice)}
+          </div>
+        </button>
+      );
+    })}
+  </div>
+) : (
+  renderGroupByType(
+    subcategory.id,
+    subcategory.options.values as Record<string, OptionValue>,
+    config[subcategory.id],
+    (key) => {
+      updateConfig(subcategory.id, key);
+      setViewMode(getViewModeForSection(category.id, subcategory.id));
+    }
+  )
+)}
                     </div>
                   );
                 })}
@@ -1722,7 +1821,7 @@ return (
           letterSpacing: "-0.05em",
         }}
       >
-        Save your design
+        {t.saveDesignTitle}
       </h1>
 
       <p
@@ -1733,7 +1832,7 @@ return (
           color: "#b7ab9a",
         }}
       >
-        Send your configuration to your email
+        {t.saveDesignSubtitle}
       </p>
 
       <div
@@ -1745,31 +1844,31 @@ return (
       >
         {[
           {
-            label: "First name",
+            label: t.firstName,
             value: leadFirstName,
             onChange: setLeadFirstName,
-            placeholder: "First name",
+            placeholder: t.firstName,
             type: "text",
           },
           {
-            label: "Last name",
+            label: t.lastName,
             value: leadLastName,
             onChange: setLeadLastName,
-            placeholder: "Last name",
+            placeholder: t.lastName,
             type: "text",
           },
           {
-            label: "Phone number",
+            label: t.phone,
             value: leadPhone,
             onChange: setLeadPhone,
             placeholder: "+386 31 234 567",
             type: "tel",
           },
           {
-            label: "Email",
+            label: t.email,
             value: leadEmail,
             onChange: setLeadEmail,
-            placeholder: "Email address",
+            placeholder: t.email,
             type: "email",
           },
         ].map((field) => (
@@ -1828,7 +1927,7 @@ return (
             cursor: "pointer",
           }}
         />
-        Receive updates and news
+        {t.receiveUpdates}
       </label>
 
       <p
@@ -1839,7 +1938,7 @@ return (
           color: "#8f887f",
         }}
       >
-        You can unsubscribe at any time.
+        {t.unsubscribeNote}
       </p>
 
       <button
@@ -1858,7 +1957,7 @@ return (
           cursor: "pointer",
         }}
       >
-        {isSendingDesign ? "Sending..." : "Send"}
+        {isSendingDesign ? t.sending : t.send}
       </button>
       {saveDesignMessage && (
   <div style={{ marginTop: 14, color: "#b79e84", fontWeight: 700 }}>

@@ -5,6 +5,21 @@ import { supabase } from "../../../lib/supabase";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+const emailTranslations = {
+  en: {
+    subject: "Your ZerroMax design",
+    subtitle: "Your saved configuration",
+    call: "Call for viewing",
+    request: "Request offer",
+  },
+  sl: {
+    subject: "Vaš ZerroMax dizajn",
+    subtitle: "Vaša shranjena konfiguracija",
+    call: "Pokliči za ogled",
+    request: "Zahtevaj ponudbo",
+  },
+};
+
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
@@ -25,7 +40,11 @@ export async function POST(request: Request) {
       finalTotal,
       summary,
       image,
+      language,
     } = body;
+
+const lang = language === "sl" ? "sl" : "en";
+const t = emailTranslations[lang];
 
     if (!email || typeof email !== "string") {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
@@ -86,11 +105,29 @@ if (error) {
 
 console.log("IMAGE URL:", imageUrl);
 
+if (newsletterConsent) {
+  try {
+   const { data, error } = await resend.contacts.create({
+  email,
+  firstName,
+  lastName,
+  unsubscribed: false,
+});
+
+console.log("RESEND DATA:", data);
+console.log("RESEND ERROR:", error);
+
+    console.log("ADDED TO NEWSLETTER:", email);
+  } catch (err) {
+    console.error("NEWSLETTER ERROR:", err);
+  }
+  
+}
     await resend.emails.send({
       from: "ZerroMax <design@mail.zerromax.com>",
       to: email,
       replyTo: "savedesign@zerromax.com", 
-      subject: `Your ZerroMax design - ${model}`,
+      subject: `${t.subject} - ${model}`,
       html: `
 <div style="margin:0;padding:0;background:#0b0b0b;font-family:'Poppins',Arial,sans-serif;">
   
@@ -132,7 +169,7 @@ console.log("IMAGE URL:", imageUrl);
               </h1>
 
               <p style="color:#aaa;margin-top:10px;">
-                Your saved configuration
+                ${t.subtitle}
               </p>
 
               <ul style="
@@ -164,7 +201,7 @@ console.log("IMAGE URL:", imageUrl);
             <td align="center" style="padding-top:30px;">
               
               <!-- PRIMARY -->
-              <a href="tel:+386XXXXXXXX"
+              <a href="tel:+38641364760"
                  style="
                    display:block;
                    width:100%;
@@ -178,7 +215,7 @@ console.log("IMAGE URL:", imageUrl);
                    margin-bottom:10px;
                    text-align:center;
                  ">
-                Call for viewing
+                ${t.call}
               </a>
 
               <!-- SECONDARY -->
@@ -194,7 +231,7 @@ console.log("IMAGE URL:", imageUrl);
                    border-radius:8px;
                    text-align:center;
                  ">
-                Request offer
+                ${t.request}
               </a>
 
             </td>
