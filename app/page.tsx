@@ -259,6 +259,7 @@ const labelTranslations: Record<string, Record<string, string>> = {
   "Construction": "Konstrukcija",
   "Exterior": "Eksterijer",
   "Interior": "Interijer",
+  "Bathroom": "Kupaonica",
   "Equipment": "Oprema",
 
   "Facade": "Fasada",
@@ -914,7 +915,7 @@ ${shareUrl}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
         {visibleEntries.map(([key, value]) => {
           const active = selectedValue === key;
-          const displayPrice = getDisplayPrice("boiler", key)
+          const displayPrice = getDisplayPrice("equipment", key)
 
           return (
             <button
@@ -1926,7 +1927,10 @@ return (
           width: "100%",
           maxWidth: 1480,
           margin: "0 auto",
-          padding: isMobile ? "12px 14px 14px" : "14px 22px 18px",
+          padding: isMobile ? "16px 18px 20px" : "14px 22px 18px",
+          paddingBottom: isMobile
+      ? "max(20px, env(safe-area-inset-bottom))"
+      : 18,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",

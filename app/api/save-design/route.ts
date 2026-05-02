@@ -18,6 +18,12 @@ const emailTranslations = {
     call: "Pokliči za ogled",
     request: "Zahtevaj ponudbo",
   },
+  hr: {
+    subject: "Vaš ZerroMax dizajn",
+    subtitle: "Vaša spremljena konfiguracija",
+    call: "Nazovite za pregled",
+    request: "Zatraži ponudu",
+  },
 };
 
 export const runtime = "nodejs";

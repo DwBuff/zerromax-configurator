@@ -11,7 +11,7 @@ wood36.exterior_door.balcony,0
 
 # WOOD 36 - CANOPY
 wood36.terrace.none,0
-wood36.terrace.70,990
+wood36.terrace.70,890
 
 # WOOD 36 - TERRACE FLOOR
 wood36.terrace_floor.spruce,1790
@@ -21,13 +21,13 @@ wood36.terrace_floor.tropical,3690
 # WOOD 36 - WINDOWS TYPE
 wood36.windows_type.fixed,0
 wood36.windows_type.door_quarter,0
-wood36.windows_type.sliding_quarter,0
+wood36.windows_type.sliding_quarter,2250
 wood36.windows_type.sliding_half,0
 
 # WOOD 36 - WINDOW COLOR
 wood36.windows_color.white,0
-wood36.windows_color.anthracite,0
-wood36.windows_color.mixed,0
+wood36.windows_color.anthracite,790
+wood36.windows_color.mixed,790
 
 # WOOD 36 - FLOOR CONSTRUCTION
 wood36.floor_construction.wood,0
@@ -35,7 +35,7 @@ wood36.floor_construction.magnelis,1990
 
 # WOOD 36 - CONSTRUCTION
 wood36.construction.wood,0
-wood36.construction.magnelis,3990
+wood36.construction.magnelis,4990
 
 # WOOD 36 - EXTRA INSULATION
 wood36.extra_insulation.none,0
