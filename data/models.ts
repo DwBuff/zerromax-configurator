@@ -270,17 +270,23 @@ const wood36Categories: Category[] = [
     ],
   },
   {
-    id: "equipment",
-    name: "Equipment",
-    options: {
-      default: "none",
-      values: {
-        none: { label: "No boiler", price: 0 },
-        boiler_50: { label: "Boiler 50L", price: 0 },
-        boiler_80: { label: "Boiler 80L", price: 0 },
+  id: "equipment",
+  name: "Equipment",
+  subcategories: [
+    {
+      id: "boiler",
+      name: "Boiler",
+      options: {
+        default: "none",
+        values: {
+          none: { label: "No boiler", price: 0 },
+          boiler_50: { label: "Boiler 50L", price: 550 },
+          boiler_80: { label: "Boiler 80L", price: 890 },
+        },
       },
     },
-  },
+  ],
+}
 ];
 
 const wood50Categories: Category[] = [

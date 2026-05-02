@@ -123,6 +123,52 @@ const translations = {
     receiveUpdates: "Prejemaj novosti in obvestila",
     unsubscribeNote: "Kadarkoli se lahko odjaviš.",
   },
+
+  hr: {
+  public: "Javno",
+  commercialist: "Komercijalist",
+  dimensions: "Dimenzije",
+  grossArea: "Bruto površina",
+  height: "Visina",
+  offerDetails: "Podaci ponude",
+  customerName: "Ime kupca",
+  offerDate: "Datum ponude",
+  offerNumber: "Broj ponude",
+  deliveryAddress: "Adresa dostave",
+  distance: "Udaljenost (km)",
+  shareLink: "Poveznica",
+  copyFullLink: "Kopiraj poveznicu",
+  copied: "Kopirano",
+  exportTxt: "Izvoz TXT",
+  exportPdf: "Izvoz PDF",
+  summary: "Sažetak",
+  showPricingBreakdown: "Prikaži razradu cijene",
+  finalTotal: "Ukupna cijena",
+  exportOffer: "Izvezi ponudu",
+  requestQuote: "Spremi dizajn",
+  included: "Uključeno",
+  exterior: "Eksterijer",
+  interior: "Interijer",
+  bathroom: "Kupaonica",
+  base: "Osnova",
+
+  selectedConfiguration: "Odabrana konfiguracija",
+
+  notSpecified: "Nije određeno",
+  model: "Model",
+  productBreakdown: "Razrada proizvoda",
+
+  saveDesignTitle: "Spremi svoj dizajn",
+  saveDesignSubtitle: "Pošalji konfiguraciju na svoj email",
+  firstName: "Ime",
+  lastName: "Prezime",
+  phone: "Telefon",
+  email: "Email",
+  send: "Pošalji",
+  sending: "Slanje...",
+  receiveUpdates: "Primaj novosti i obavijesti",
+  unsubscribeNote: "U svakom trenutku se možeš odjaviti.",
+}
 };
 
 const labelTranslations: Record<string, Record<string, string>> = {
@@ -207,10 +253,87 @@ const labelTranslations: Record<string, Record<string, string>> = {
 
 "No extra insulation": "Brez dodatne izolacije",
   },
+
+  hr: {
+  "Floor Construction": "Konstrukcija poda",
+  "Construction": "Konstrukcija",
+  "Exterior": "Eksterijer",
+  "Interior": "Interijer",
+  "Equipment": "Oprema",
+
+  "Facade": "Fasada",
+  "Exterior Door": "Ulazna vrata",
+  "Canopy": "Nadstrešnica",
+  "Terrace Floor": "Pod terase",
+  "Window Type": "Tip prozora",
+  "Window Color": "Boja prozora",
+  "Roof Type": "Tip krova",
+  "Roof Color": "Boja krova",
+  "Knee Wall": "Koljenasti zid",
+  "Extra Insulation": "Dodatna izolacija",
+
+  "Bathroom Equipment": "Oprema kupaonice",
+  "Bathroom Walls": "Zidovi kupaonice",
+  "Staircase": "Stepenice",
+  "Interior Wall": "Unutarnji zidovi",
+  "Floor Cladding": "Podna obloga",
+  "Mansard": "Potkrovlje",
+
+  "Wood": "Drvo",
+  "Magnelis metal": "Magnelis konstrukcija",
+  "Normal": "Standardna",
+  "Balcony": "Balkonska",
+  "Fixed windows": "Fiksni prozori",
+  "White": "Bijela",
+  "Anthracite": "Antracit",
+  "Black": "Crna",
+  "Brown": "Smeđa",
+  "Sheet metals": "Lim",
+  "Roof tile imitation": "Imitacija crijepa",
+  "Laminate": "Laminat",
+  "Vinyl": "Vinil",
+  "Half": "Polovična",
+  "Full": "Potpuna",
+
+  "Vilo - Wood": "Vilo - drvo",
+  "Contact facade plaster 1.5mm": "Kontaktna fasada 1.5mm",
+  "Facade cladding Larch": "Fasadna obloga ariš",
+
+  "No canopy": "Bez nadstrešnice",
+  "70 cm": "70 cm",
+
+  "Wooden cladding (spruce)": "Drvena obloga (smreka)",
+  "Wooden cladding (WPC)": "Drvena obloga (WPC)",
+  "Wooden cladding (tropical wood)": "Drvena obloga (tropsko drvo)",
+
+  "Additional insulation 100mm EPS": "Dodatna izolacija 100mm EPS",
+
+  "No bathroom": "Bez kupaonice",
+  "Basic": "Osnovna",
+  "LUX": "Luksuzna",
+
+  "No boiler": "Bez bojlera",
+  "Boiler 50L": "Bojler 50L",
+  "Boiler 80L": "Bojler 80L",
+
+  "PVC white": "PVC bijela",
+  "PVC gray": "PVC siva",
+
+  "Plywood": "Šperploča",
+  "Wall cladding": "Zidna obloga",
+
+  "White inside / Anthracite outside": "Bijela unutra / antracit vani",
+
+  "1/4 Door": "1/4 vrata",
+  "1/4 Sliding Door": "1/4 klizna vrata",
+  "1/2 Sliding Door": "1/2 klizna vrata",
+
+  "No extra insulation": "Bez dodatne izolacije",
+}
 };
 
 export default function Home() {
-  const [language, setLanguage] = useState<"en" | "sl">("en");
+  const [language, setLanguage] = useState<"en" | "sl" | "hr">("en");
 const t = translations[language];
 
 const captureImage = () => {
@@ -241,6 +364,71 @@ const [leadFirstName, setLeadFirstName] = useState("");
 const [leadLastName, setLeadLastName] = useState("");
 const [leadEmail, setLeadEmail] = useState("");
 const [leadPhone, setLeadPhone] = useState("");
+const [phoneError, setPhoneError] = useState("");
+const [open, setOpen] = useState(false);
+
+const europeanCountries = [
+  { code: "SI", dial: "+386", length: 8 },
+  { code: "HR", dial: "+385", length: 8 },
+  { code: "AT", dial: "+43", length: 10 },
+  { code: "DE", dial: "+49", length: 10 },
+  { code: "IT", dial: "+39", length: 10 },
+  { code: "FR", dial: "+33", length: 9 },
+  { code: "ES", dial: "+34", length: 9 },
+  { code: "NL", dial: "+31", length: 9 },
+  { code: "BE", dial: "+32", length: 9 },
+  { code: "CH", dial: "+41", length: 9 },
+  { code: "PL", dial: "+48", length: 9 },
+  { code: "CZ", dial: "+420", length: 9 },
+  { code: "SK", dial: "+421", length: 9 },
+  { code: "HU", dial: "+36", length: 9 },
+  { code: "RO", dial: "+40", length: 9 },
+  { code: "BG", dial: "+359", length: 9 },
+  { code: "GR", dial: "+30", length: 10 },
+  { code: "SE", dial: "+46", length: 9 },
+  { code: "NO", dial: "+47", length: 8 },
+  { code: "DK", dial: "+45", length: 8 },
+  { code: "FI", dial: "+358", length: 9 },
+  { code: "IE", dial: "+353", length: 9 },
+  { code: "PT", dial: "+351", length: 9 },
+  { code: "RS", dial: "+381", length: 9 },
+  { code: "BA", dial: "+387", length: 8 },
+  { code: "ME", dial: "+382", length: 8 },
+  { code: "MK", dial: "+389", length: 8 },
+  { code: "AL", dial: "+355", length: 9 },
+];
+const [country, setCountry] = useState(europeanCountries[0]);
+useEffect(() => {
+  fetch("https://ipapi.co/json/")
+    .then((res) => res.json())
+    .then((data) => {
+    console.log("GEO DATA:", data);
+
+      const countryCode = data.country_code;
+
+      const found = europeanCountries.find(
+        (c) => c.code === countryCode
+      );
+
+      if (found) {
+        setCountry(found);
+
+
+  // 🔥 DODAJ TO
+  if (["SI"].includes(found.code)) {
+  setLanguage("sl");
+} else if (["HR", "BA", "RS", "ME", "MK"].includes(found.code)) {
+  setLanguage("hr");
+} else {
+  setLanguage("en");
+}
+      }
+    })
+    .catch(() => {
+      console.log("Geo detect failed");
+    });
+}, []);
+
 
 const [newsletterConsent, setNewsletterConsent] = useState(false);
 
@@ -657,7 +845,7 @@ ${shareUrl}
       return "swatches";
     }
 
-    if (groupId === "equipment") {
+    if (groupId === "boiler") {
       return "exclusive_checks";
     }
 
@@ -726,7 +914,7 @@ ${shareUrl}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
         {visibleEntries.map(([key, value]) => {
           const active = selectedValue === key;
-          const displayPrice = getDisplayPrice("equipment", key)
+          const displayPrice = getDisplayPrice("boiler", key)
 
           return (
             <button
@@ -989,9 +1177,18 @@ const image = captureImage();
   console.log(image?.slice(0, 50));
 
   if (!leadEmail.trim()) {
-    setSaveDesignMessage("Please enter your email.");
-    return;
-  }
+  setSaveDesignMessage("Please enter your email.");
+  return;
+}
+
+if (!leadPhone.trim()) {
+  setSaveDesignMessage(
+    language === "sl"
+      ? "Prosimo vnesite telefonsko številko."
+      : "Please enter your phone number."
+  );
+  return;
+}
 
   setIsSendingDesign(true);
   setSaveDesignMessage("");
@@ -1018,7 +1215,7 @@ const image = captureImage();
         firstName: leadFirstName,
         lastName: leadLastName,
         email: leadEmail,
-        phone: leadPhone,
+        phone: `${country.dial}${leadPhone.replace(/\D/g, "")}`,
         newsletterConsent,
         model: modelDisplayName,
         finalTotal: finalTotalFormatted,
@@ -1148,11 +1345,13 @@ return (
               marginBottom: 20,
             }}
           >
-            <img
-              src="/logo-white.svg"
-              alt="ZerroMax"
-              style={{ width: isMobile ? 150 : 180, height: "auto" }}
-            />
+            <a href="https://www.zerromax.com" target="_blank" rel="noopener noreferrer">
+  <img
+    src="/logo-white.svg"
+    alt="ZerroMax"
+    style={{ width: isMobile ? 150 : 180, height: "auto", cursor: "pointer" }}
+  />
+</a>
 
             <select
               value={language}
@@ -1171,6 +1370,7 @@ return (
             >
               <option value="en">EN</option>
               <option value="sl">SL</option>
+              <option value="hr">HR</option>
             </select>
           </div>
 
@@ -1857,13 +2057,7 @@ return (
             placeholder: t.lastName,
             type: "text",
           },
-          {
-            label: t.phone,
-            value: leadPhone,
-            onChange: setLeadPhone,
-            placeholder: "+386 31 234 567",
-            type: "tel",
-          },
+          
           {
             label: t.email,
             value: leadEmail,
@@ -1903,6 +2097,131 @@ return (
             />
           </div>
         ))}
+<div>
+  <div style={{ marginBottom: 8, fontWeight: 700 }}>
+    {language === "sl" ? "Telefon *" : "Phone number *"}
+  </div>
+
+  <div style={{ display: "flex", flexDirection: "column" }}>
+    
+    <div style={{ display: "flex", gap: 10 }}>
+      
+     <div style={{ position: "relative" }}>
+  <div
+    onClick={() => setOpen(!open)}
+    style={{
+      borderRadius: 12,
+      border: "1px solid #3a3d44",
+      background: "#1c1d21",
+      color: "#f3f0ea",
+      padding: "0 12px",
+      height: 58,
+      display: "flex",
+      alignItems: "center",
+      cursor: "pointer",
+    }}
+  >
+    {country.code} {country.dial}
+  </div>
+
+  {open && (
+    <div
+      style={{
+        position: "absolute",
+        top: "110%",
+        left: 0,
+        width: 180,
+        maxHeight: 240,
+        overflowY: "auto",
+        background: "#1c1d21",
+        border: "1px solid #3a3d44",
+        borderRadius: 12,
+        zIndex: 9999,
+      }}
+    >
+      {europeanCountries.map((c) => (
+        <div
+          key={c.dial}
+          onClick={() => {
+            setCountry(c);
+            setOpen(false);
+          }}
+          style={{
+            padding: "10px 12px",
+            cursor: "pointer",
+          }}
+        >
+          {c.code} {c.dial}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+      <input
+        type="tel"
+        value={leadPhone}
+        onChange={(e) => {
+          let value = e.target.value.replace(/\D/g, "");
+
+          // 🔥 AUTO FORMAT (Slovenia style)
+          if (country.code === "SI" || country.code === "HR") {
+            if (value.length > 2 && value.length <= 5) {
+              value = value.replace(/(\d{2})(\d+)/, "$1 $2");
+            } else if (value.length > 5) {
+              value = value.replace(/(\d{2})(\d{3})(\d+)/, "$1 $2 $3");
+            }
+          }
+
+          setLeadPhone(value);
+          setPhoneError(""); // ne validiraj med tipkanjem
+        }}
+
+       onBlur={() => {
+  const cleaned = leadPhone.replace(/\D/g, "");
+  const isAllZeros = /^0+$/.test(cleaned);
+
+  if (cleaned.length === 0) return;
+
+  if (cleaned.length !== country.length || isAllZeros) {
+    setPhoneError(
+      language === "sl"
+        ? "Telefonska številka ni veljavna"
+        : "Invalid phone number"
+    );
+  } else {
+    setPhoneError("");
+  }
+}}
+
+        placeholder="31 234 567"
+        style={{
+          flex: 1,
+          height: 58,
+          borderRadius: 16,
+          border: phoneError
+            ? "1px solid #e5484d"
+            : "1px solid #3a3d44",
+          background: "#1c1d21",
+          color: "#f3f0ea",
+          padding: "0 16px",
+          fontSize: 17,
+        }}
+      />
+    </div>
+
+    {phoneError && (
+      <div style={{ color: "#e5484d", fontSize: 13, marginTop: 6 }}>
+        {phoneError}
+      </div>
+    )}
+  </div>
+
+  <div style={{ fontSize: 12, color: "#8f887f", marginTop: 6 }}>
+    * {language === "sl" ? "Obvezno" : "Required"}
+  </div>
+</div>
+
       </div>
 
       <label
@@ -1943,7 +2262,7 @@ return (
 
       <button
          onClick={handleSaveDesign}
-  disabled={isSendingDesign}
+  disabled={isSendingDesign || !leadEmail || !leadPhone}
   style={{
           width: "100%",
           marginTop: 34,

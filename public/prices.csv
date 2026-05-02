@@ -82,5 +82,5 @@ wood36.knee_wall.100,1990
 
 # WOOD 36 - EQUIPMENT
 wood36.equipment.none,0
-wood36.equipment.boiler_50,550
-wood36.equipment.boiler_80,890
+wood36.boiler.boiler_50,550
+wood36.boiler.boiler_80,890

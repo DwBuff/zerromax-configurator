@@ -85,7 +85,7 @@ const { data, error } = await supabase
       first_name: firstName || null,
       last_name: lastName || null,
       email,
-      phone: phone || null,
+      phone: country.dial + leadPhone,
       newsletter: newsletterConsent || false,
       model,
       final_total: finalTotal ? Number(finalTotal) : null,
