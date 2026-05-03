@@ -1015,6 +1015,38 @@ if (logo) {
     y += 16;
   });
 
+  additionalItems
+  .filter((extra) => extra.name.trim() && Number(extra.price) > 0)
+  .forEach((extra) => {
+    if (y > 250) {
+      addFooter();
+      doc.addPage();
+      addBackground();
+      sectionTitle(t.productBreakdown, 42);
+      y = 58;
+    }
+
+    cardBox(18, y, 174, 14);
+
+    doc.setFont("Poppins", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(white);
+    doc.text(extra.name, 26, y + 9);
+
+    doc.setTextColor(gold);
+    doc.text(
+      `+€${Number(extra.price).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`,
+      178,
+      y + 9,
+      { align: "right" }
+    );
+
+    y += 17;
+  });
+
   doc.setDrawColor(gold);
   doc.setLineWidth(0.8);
   doc.line(18, 258, 192, 258);
@@ -1747,38 +1779,73 @@ return (
                 Include delivery and assembly
               </label>
 
-              <div className="mt-6 rounded-3xl border border-[#2a2a35] p-5 bg-[#111118]">
-  <div className="flex items-center justify-between mb-4">
-    <h3 className="text-white text-xl font-semibold">
+              <div
+  style={{
+    marginTop: 28,
+    padding: 20,
+    borderRadius: 24,
+    border: "1px solid #2a2c31",
+    background: "#17181b",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 16,
+    }}
+  >
+    <h3 style={{ margin: 0, fontSize: 26, fontWeight: 800 }}>
       Dodatni predmeti
     </h3>
 
     <button
       onClick={addAdditionalItem}
-      className="w-12 h-12 rounded-2xl bg-[#c8ad8b] text-black text-3xl flex items-center justify-center hover:opacity-90 transition"
+      style={{
+        width: 48,
+        height: 48,
+        borderRadius: 16,
+        border: "none",
+        background: "#b79e84",
+        color: "#111214",
+        fontSize: 30,
+        fontWeight: 700,
+        cursor: "pointer",
+      }}
     >
       +
     </button>
   </div>
 
-  <div className="flex flex-col gap-3">
+  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
     {additionalItems.map((item, index) => (
       <div
         key={index}
-        className="flex gap-3 items-center"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 140px 48px",
+          gap: 10,
+          alignItems: "center",
+        }}
       >
         <input
           type="text"
-          placeholder="Ime novega predmeta"
+          placeholder="Ime predmeta"
           value={item.name}
           onChange={(e) =>
-            updateAdditionalItem(
-              index,
-              "name",
-              e.target.value
-            )
+            updateAdditionalItem(index, "name", e.target.value)
           }
-          className="flex-1 bg-[#181820] border border-[#2a2a35] rounded-2xl px-5 py-4 text-white outline-none"
+          style={{
+            height: 54,
+            borderRadius: 16,
+            border: "1px solid #2a2c31",
+            background: "#1c1d21",
+            color: "#f3f0ea",
+            padding: "0 16px",
+            fontSize: 16,
+            outline: "none",
+          }}
         />
 
         <input
@@ -1786,32 +1853,57 @@ return (
           placeholder="0"
           value={item.price || ""}
           onChange={(e) =>
-            updateAdditionalItem(
-              index,
-              "price",
-              e.target.value
-            )
+            updateAdditionalItem(index, "price", e.target.value)
           }
-          className="w-[140px] bg-[#181820] border border-[#2a2a35] rounded-2xl px-5 py-4 text-white outline-none"
+          style={{
+            height: 54,
+            borderRadius: 16,
+            border: "1px solid #2a2c31",
+            background: "#1c1d21",
+            color: "#f3f0ea",
+            padding: "0 14px",
+            fontSize: 16,
+            outline: "none",
+          }}
         />
 
         <button
           onClick={() => removeAdditionalItem(index)}
-          className="w-12 h-12 rounded-2xl border border-[#2a2a35] text-[#c8ad8b] hover:bg-[#1b1b24]"
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 16,
+            border: "1px solid #2a2c31",
+            background: "#1c1d21",
+            color: "#b79e84",
+            fontSize: 24,
+            cursor: "pointer",
+          }}
         >
-          ✕
+          ×
         </button>
       </div>
     ))}
   </div>
 
-  <div className="flex justify-between mt-5 pt-4 border-t border-[#2a2a35]">
-    <span className="text-[#c8ad8b]">
-      Skupaj dodatni predmeti
-    </span>
-
-    <span className="text-white font-semibold">
-      €{additionalItemsTotal.toLocaleString()}
+  <div
+    style={{
+      marginTop: 16,
+      paddingTop: 14,
+      borderTop: "1px solid #2a2c31",
+      display: "flex",
+      justifyContent: "space-between",
+      color: "#b79e84",
+      fontWeight: 700,
+      fontSize: 16,
+    }}
+  >
+    <span>Skupaj dodatni predmeti</span>
+    <span>
+      €{additionalItemsTotal.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}
     </span>
   </div>
 </div>
