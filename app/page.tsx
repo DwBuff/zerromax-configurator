@@ -856,7 +856,7 @@ ${shareUrl}
  const logo = await loadImage("/logo-black.png");
 
 if (logo) {
-  doc.addImage(logo, "PNG", 18, 14, 42, 14);
+  doc.addImage(logo, "PNG", 18, 14, 46, 10);
 }
 
   doc.setTextColor(gold);
