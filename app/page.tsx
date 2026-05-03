@@ -809,12 +809,6 @@ ${shareUrl}
   doc.rect(0, 0, pageW, pageH, "F");
 };
 
-  const addLogoText = (x = 18, y = 22, size = 22) => {
-    doc.setTextColor(white);
-    doc.setFontSize(size);
-    doc.text("ZerroMax", x, y);
-  };
-
   const sectionTitle = (title: string, y: number) => {
     doc.setTextColor(white);
     doc.setFontSize(18);
@@ -861,14 +855,12 @@ if (logo) {
 
   doc.setTextColor(gold);
   doc.setFontSize(10);
-  doc.text("MODULAR LIVING CONFIGURATION", 18, 42);
 
   doc.setTextColor(white);
   doc.setFontSize(36);
   doc.text(modelDisplayName, 18, 62);
   doc.setFontSize(14);
-doc.setTextColor(muted);
-doc.text("Premium modular living", 18, 72);
+  doc.setTextColor(muted);
 
   doc.setTextColor(muted);
   doc.setFontSize(13);
