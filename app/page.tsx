@@ -770,89 +770,235 @@ ${shareUrl}
   };
 
   const exportPdf = async () => {
-  const doc = new jsPDF();
+  const doc = new jsPDF("p", "mm", "a4");
 
+  // FONT
   const font = await loadFont("/fonts/Poppins-Regular.ttf");
-
   doc.addFileToVFS("Poppins-Regular.ttf", font);
   doc.addFont("Poppins-Regular.ttf", "Poppins", "normal", "Identity-H");
   doc.setFont("Poppins", "normal");
-  doc.setFontSize(11);
-  doc.setCharSpace(0);
-    const logo = new Image();
-    logo.src = "/logo.png";
 
-    const drawPdf = (withLogo: boolean) => {
-      let y = 20;
+  const pageW = 210;
+  const pageH = 297;
 
-      if (withLogo) {
-        const imgWidth = 55;
-        const aspectRatio = logo.height / logo.width;
-        const imgHeight = imgWidth * aspectRatio;
-        doc.addImage(logo, "PNG", 20, 15, imgWidth, imgHeight);
-      } else {
-        doc.setFont("Poppins-Bold", "normal");
-        doc.setFontSize(18);
-        doc.text("ZerroMax", 20, 22);
-      }
+  const dark = "#111214";
+  const card = "#17181b";
+  const border = "#2a2c31";
+  const gold = "#b79e84";
+  const white = "#f3f0ea";
+  const muted = "#b7ab9a";
 
-      doc.setFont("Poppins-Bold", "normal");
-      doc.setFontSize(16);
-      doc.text(modelDisplayName, 105, 30, { align: "center" });
+  const safeText = (value: string) =>
+    value
+      .replace(/č/g, "č")
+      .replace(/š/g, "š")
+      .replace(/ž/g, "ž")
+      .replace(/ć/g, "ć")
+      .replace(/đ/g, "đ");
 
-      y = 45;
-      doc.setFont("Poppins-Regular", "normal");
-      doc.setFontSize(11);
-      doc.text(`Dimensions: ${modelDimensions}`, 20, y);
-      doc.text(`Gross Area: ${modelGrossArea}`, 82, y);
-      doc.text(`Height: ${height}`, 150, y);
+  const money = (value: number) =>
+    value === 0
+      ? t.included
+      : `+€${value.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`;
 
-      y += 10;
-      doc.line(20, y, 190, y);
-
-      y += 12;
-      doc.setFont("Poppins-Bold", "normal");
-      doc.text(t.offerDetails, 20, y);
-
-      y += 8;
-      doc.setFont("Poppins-Regular", "normal");
-      doc.text(`${t.customerName}: ${customerName || "Not specified"}`, 20, y);
-      y += 7;
-      doc.text(`${t.offerDate}: ${offerDate || "Not specified"}`, 20, y);
-      y += 7;
-      doc.text(`${t.offerNumber}: ${offerNumber}`, 20, y);
-      y += 7;
-      doc.text(`${t.deliveryAddress}: ${deliveryAddress || "Not specified"}`, 20, y);
-      y += 7;
-      doc.text(`${t.distance}: ${deliveryKmNumber.toFixed(1)} km`, 20, y);
-
-      y += 14;
-      doc.setFont("Poppins-Bold", "normal");
-      doc.text(t.selectedConfiguration, 20, y);
-
-      breakdown
-        .filter((item) => item.label !== "Base")
-        .forEach((item) => {
-          y += 7;
-          doc.setFont("Poppins-Regular", "normal");
-          doc.text(formatBreakdownLabel(item.label), 20, y);
-        });
-
-      y += 12;
-      doc.line(20, y, 190, y);
-
-      y += 12;
-      doc.setFont("Poppins-Bold", "normal");
-      doc.setFontSize(14);
-      doc.text(t.finalTotal, 20, y);
-      doc.text(`€${finalTotalFormatted}`, 180, y, { align: "right" });
-
-      doc.save(`ZerroMax-offer-${offerNumber}.pdf`);
-    };
-
-    logo.onload = () => drawPdf(true);
-    logo.onerror = () => drawPdf(false);
+  const addBackground = () => {
+    doc.setFillColor(dark);
+    doc.rect(0, 0, pageW, pageH, "F");
   };
+
+  const addLogoText = (x = 18, y = 22, size = 22) => {
+    doc.setTextColor(white);
+    doc.setFontSize(size);
+    doc.text("ZerroMax", x, y);
+  };
+
+  const sectionTitle = (title: string, y: number) => {
+    doc.setTextColor(white);
+    doc.setFontSize(18);
+    doc.text(safeText(title), 18, y);
+
+    doc.setDrawColor(gold);
+    doc.setLineWidth(0.8);
+    doc.line(18, y + 4, 58, y + 4);
+  };
+
+  const cardBox = (x: number, y: number, w: number, h: number) => {
+    doc.setFillColor(card);
+    doc.setDrawColor(border);
+    doc.roundedRect(x, y, w, h, 4, 4, "FD");
+  };
+
+  const addFooter = () => {
+    doc.setTextColor("#6f6a63");
+    doc.setFontSize(9);
+    doc.text("ZerroMax © 2026", 18, 286);
+    doc.text(`Offer ${offerNumber}`, 180, 286, { align: "right" });
+  };
+
+  const loadImage = (src: string) =>
+    new Promise<HTMLImageElement | null>((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+
+  const logo = await loadImage("/logo-white.svg");
+  const modelImage = captureImage();
+
+  // PAGE 1 — COVER
+  addBackground();
+
+  if (logo) {
+    doc.addImage(logo, "PNG", 18, 16, 48, 12);
+  } else {
+    addLogoText(18, 24, 22);
+  }
+
+  doc.setTextColor(gold);
+  doc.setFontSize(10);
+  doc.text("MODULAR LIVING CONFIGURATION", 18, 42);
+
+  doc.setTextColor(white);
+  doc.setFontSize(36);
+  doc.text(modelDisplayName, 18, 62);
+
+  doc.setTextColor(muted);
+  doc.setFontSize(13);
+  doc.text(safeText(t.selectedConfiguration), 18, 72);
+
+  if (modelImage) {
+    try {
+      doc.addImage(modelImage, "PNG", 28, 82, 154, 100);
+    } catch {
+      // ignore image if canvas export fails
+    }
+  }
+
+  cardBox(18, 198, 174, 46);
+
+  doc.setTextColor(muted);
+  doc.setFontSize(11);
+  doc.text(safeText(t.finalTotal), 28, 216);
+
+  doc.setTextColor(white);
+  doc.setFontSize(30);
+  doc.text(`€${finalTotalFormatted}`, 28, 235);
+
+  doc.setTextColor(muted);
+  doc.setFontSize(10);
+  doc.text(`${t.offerNumber}: ${offerNumber}`, 128, 216);
+  doc.text(`${t.offerDate}: ${offerDate || new Date().toISOString().split("T")[0]}`, 128, 224);
+  doc.text(`${t.model}: ${modelDisplayName}`, 128, 232);
+
+  addFooter();
+
+  // PAGE 2 — OFFER DETAILS + CONFIGURATION
+  doc.addPage();
+  addBackground();
+  addLogoText();
+
+  sectionTitle(t.offerDetails, 42);
+
+  cardBox(18, 52, 174, 42);
+
+  doc.setFontSize(10);
+  doc.setTextColor(muted);
+  doc.text(safeText(t.customerName), 28, 66);
+  doc.text(safeText(t.deliveryAddress), 110, 66);
+  doc.text(safeText(t.distance), 28, 84);
+  doc.text(safeText(t.offerDate), 110, 84);
+
+  doc.setTextColor(white);
+  doc.setFontSize(11);
+  doc.text(safeText(customerName || t.notSpecified), 28, 73);
+  doc.text(safeText(deliveryAddress || t.notSpecified), 110, 73);
+  doc.text(`${deliveryKmNumber.toFixed(1)} km`, 28, 91);
+  doc.text(offerDate || t.notSpecified, 110, 91);
+
+  sectionTitle(t.selectedConfiguration, 118);
+
+  const configItems = breakdown.filter((item) => item.label !== "Base");
+
+  let y = 132;
+
+  configItems.forEach((item) => {
+    if (y > 265) {
+      addFooter();
+      doc.addPage();
+      addBackground();
+      addLogoText();
+      sectionTitle(t.selectedConfiguration, 42);
+      y = 56;
+    }
+
+    const label = safeText(formatBreakdownLabel(item.label));
+
+    cardBox(18, y, 174, 11);
+
+    doc.setTextColor(white);
+    doc.setFontSize(10);
+    doc.text(label, 26, y + 7.2);
+
+    y += 14;
+  });
+
+  addFooter();
+
+  // PAGE 3 — PRICE BREAKDOWN
+  doc.addPage();
+  addBackground();
+  addLogoText();
+
+  sectionTitle(t.productBreakdown, 42);
+
+  y = 58;
+
+  breakdown.forEach((item) => {
+    if (y > 250) {
+      addFooter();
+      doc.addPage();
+      addBackground();
+      addLogoText();
+      sectionTitle(t.productBreakdown, 42);
+      y = 58;
+    }
+
+    const label =
+      item.label === "Base" ? t.base : formatBreakdownLabel(item.label);
+
+    cardBox(18, y, 174, 13);
+
+    doc.setTextColor(white);
+    doc.setFontSize(10);
+    doc.text(safeText(label), 26, y + 8.5, { maxWidth: 120 });
+
+    doc.setTextColor(gold);
+    doc.text(money(item.value), 184, y + 8.5, { align: "right" });
+
+    y += 16;
+  });
+
+  doc.setDrawColor(gold);
+  doc.setLineWidth(0.8);
+  doc.line(18, 258, 192, 258);
+
+  doc.setTextColor(white);
+  doc.setFontSize(16);
+  doc.text(safeText(t.finalTotal), 18, 272);
+
+  doc.setTextColor(gold);
+  doc.setFontSize(24);
+  doc.text(`€${finalTotalFormatted}`, 192, 272, { align: "right" });
+
+  addFooter();
+
+  doc.save(`ZerroMax-offer-${offerNumber}.pdf`);
+};
 
   const getDisplayPrice = (groupId: string, optionKey: string) => {
   const csvKey = `${modelKey}.${groupId}.${optionKey}`;
