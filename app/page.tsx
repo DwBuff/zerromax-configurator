@@ -853,7 +853,11 @@ ${shareUrl}
   // PAGE 1 — COVER
   addBackground();
 
- addLogoText(18, 24, 22);
+ const logo = await loadImage("/logo-black.png");
+
+if (logo) {
+  doc.addImage(logo, "PNG", 18, 14, 42, 14);
+}
 
   doc.setTextColor(gold);
   doc.setFontSize(10);
@@ -868,7 +872,7 @@ doc.text("Premium modular living", 18, 72);
 
   doc.setTextColor(muted);
   doc.setFontSize(13);
-  doc.text(safeText(t.selectedConfiguration), 18, 72);
+  doc.text(safeText(t.selectedConfiguration), 18, 82);
 
   if (modelImage) {
     try {
