@@ -26,6 +26,7 @@ function HouseModel({
   modelPath,
   terrace,
   facade,
+  onLoaded,
   terraceCladding,
   windowColor,
   windowType,
@@ -42,6 +43,7 @@ function HouseModel({
   modelPath: string;
   terrace: string;
   facade: string;
+  onLoaded?: () => void;
   terraceCladding: string;
   windowColor: string;
   windowType: string;
@@ -56,6 +58,10 @@ function HouseModel({
   bathroom: string;
 }) {
   const { scene, materials } = useGLTF(modelPath) as unknown as GLTFResult;
+
+  useEffect(() => {
+  onLoaded?.();
+}, [onLoaded]);
 
   useEffect(() => {
     // CANOPY
@@ -438,6 +444,7 @@ function CameraControls({
 
 export default function ModelViewer({
   modelPath,
+  onLoaded,
   terrace,
   facade,
   terraceCladding,
@@ -455,6 +462,7 @@ export default function ModelViewer({
   bathroom,
 }: {
   modelPath: string;
+  onLoaded?: () => void;
   terrace: string;
   facade: string;
   terraceCladding: string;
@@ -485,6 +493,7 @@ export default function ModelViewer({
 
         <HouseModel
           modelPath={modelPath}
+          onLoaded={onLoaded}
           terrace={terrace}
           facade={facade}
           terraceCladding={terraceCladding}

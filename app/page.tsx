@@ -345,6 +345,30 @@ const captureImage = () => {
   return canvas.toDataURL("image/png");
 };
 
+const [initialLoading, setInitialLoading] = useState(true);
+const [progress, setProgress] = useState(0);
+
+useEffect(() => {
+  let current = 0;
+
+  const interval = setInterval(() => {
+    current += Math.random() * 18;
+
+    if (current >= 100) {
+      current = 100;
+      clearInterval(interval);
+
+      setTimeout(() => {
+        setInitialLoading(false);
+      }, 300);
+    }
+
+    setProgress(Math.floor(current));
+  }, 120);
+
+  return () => clearInterval(interval);
+}, []);
+
 const [isSalesPath, setIsSalesPath] = useState(false);
 useEffect(() => {
   const salesPath = window.location.pathname.startsWith("/sales");
@@ -430,6 +454,7 @@ useEffect(() => {
     });
 }, []);
 
+const [modelLoaded, setModelLoaded] = useState(false);
 
 const [newsletterConsent, setNewsletterConsent] = useState(false);
 
@@ -504,8 +529,6 @@ const goToNextModel = () => {
       }
     });
 
-
-    
     return initialConfig;
   }, [model]);
 
@@ -1240,10 +1263,57 @@ if (!leadPhone.trim()) {
   }
 };
 
-  if (!mounted) return null;
+  
+if (!mounted) return null;
 
 return (
   <main style={{ minHeight: "100vh", background: "#111214", color: "#f3f0ea" }}>
+    {(initialLoading || !modelLoaded) && (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 99999,
+          background: "#111214",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          color: "#f3f0ea",
+        }}
+      >
+        <img
+          src="/logo-white.svg"
+          alt="ZerroMax"
+          style={{ width: 170, marginBottom: 40 }}
+        />
+
+        <div
+          style={{
+            width: 180,
+            height: 2,
+            background: "#2a2c31",
+            borderRadius: 999,
+            overflow: "hidden",
+            marginBottom: 28,
+          }}
+        >
+          <div
+            style={{
+              width: `${progress}%`,
+              height: "100%",
+              background: "#b79e84",
+              transition: "width 0.2s ease",
+            }}
+          />
+        </div>
+
+        <div style={{ fontSize: 34, fontWeight: 300, letterSpacing: "-0.04em" }}>
+          {progress}%
+        </div>
+      </div>
+    )}
+
     <div
       style={{
         display: "grid",
@@ -1263,50 +1333,8 @@ return (
             boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              top: 14,
-              right: 14,
-              zIndex: 20,
-              display: "flex",
-              gap: 8,
-              padding: 8,
-              borderRadius: 18,
-              background: "rgba(23,24,27,0.82)",
-              border: "1px solid #2a2c31",
-              backdropFilter: "blur(10px)",
-            }}
-          >
-            {[
-              { id: "exterior", label: "Exterior" },
-              { id: "interior", label: "Interior" },
-              { id: "bathroom", label: "Bathroom" },
-            ].map((item) => {
-              const active = viewMode === item.id;
-
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setViewMode(item.id as typeof viewMode)}
-                  style={{
-                    borderRadius: 14,
-                    padding: "10px 12px",
-                    border: active ? "1px solid #b79e84" : "1px solid transparent",
-                    background: active ? "#b79e84" : "transparent",
-                    color: active ? "#111214" : "#f3f0ea",
-                    fontWeight: 700,
-                    fontSize: 12,
-                    cursor: "pointer",
-                  }}
-                >
-                  {translateLabel(item.label)}
-                </button>
-              );
-            })}
-          </div>
-
           <ModelViewer
+            onLoaded={() => setModelLoaded(true)}
             modelPath={model.glb}
             terrace={config.terrace}
             facade={config.facade}
@@ -1888,6 +1916,7 @@ return (
             </div>
 
             <ModelViewer
+              onLoaded={() => setModelLoaded(true)} 
               modelPath={model.glb}
               terrace={config.terrace}
               facade={config.facade}
@@ -2292,4 +2321,5 @@ return (
 )}
 
   </main>
-); }
+); 
+}
