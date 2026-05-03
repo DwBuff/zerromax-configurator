@@ -847,17 +847,12 @@ ${shareUrl}
       img.src = src;
     });
 
-  const logo = await loadImage("/logo-white.svg");
   const modelImage = captureImage();
 
   // PAGE 1 — COVER
   addBackground();
 
-  if (logo) {
-    doc.addImage(logo, "PNG", 18, 16, 48, 12);
-  } else {
-    addLogoText(18, 24, 22);
-  }
+ addLogoText(18, 24, 22);
 
   doc.setTextColor(gold);
   doc.setFontSize(10);
