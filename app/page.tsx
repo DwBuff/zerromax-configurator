@@ -466,7 +466,9 @@ const [includeDeliveryAssembly, setIncludeDeliveryAssembly] = useState(false);
 const [modelKey, setModelKey] = useState<ModelKey>("wood36");
 
 useEffect(() => {
-  const pathModel = window.location.pathname.replace("/", "") as ModelKey;
+  const pathModel = window.location.pathname
+  .replace("/sales", "")
+  .replace("/", "") as ModelKey;
 
   if (models[pathModel]) {
     setModelKey(pathModel);
