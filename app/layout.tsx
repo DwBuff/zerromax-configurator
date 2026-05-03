@@ -1,5 +1,6 @@
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
   title: "ZerroMax Configurator",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body>{children}</body>
+        <body>{children}
+          <Analytics />
+        </body>
       </html>
     </ClerkProvider>
   );
