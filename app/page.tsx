@@ -463,6 +463,14 @@ const [saveDesignMessage, setSaveDesignMessage] = useState("");
 
 const [includeDeliveryAssembly, setIncludeDeliveryAssembly] = useState(false);
 
+const [additionalItems, setAdditionalItems] = useState([
+  { name: "", price: 0 },
+]);
+const additionalItemsTotal = additionalItems.reduce(
+  (sum, item) => sum + (Number(item.price) || 0),
+  0
+);
+
 const [modelKey, setModelKey] = useState<ModelKey>("wood36");
 
 useEffect(() => {
@@ -511,6 +519,47 @@ const goToNextModel = () => {
   const [offerNumber, setOfferNumber] = useState("ZM-2026-001");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryKm, setDeliveryKm] = useState("0");
+
+  const [additionalItems, setAdditionalItems] = useState([
+  { name: "", price: 0 },
+]);
+
+const additionalItemsTotal = additionalItems.reduce(
+  (sum, item) => sum + (Number(item.price) || 0),
+  0
+);
+
+const addAdditionalItem = () => {
+  setAdditionalItems([
+    ...additionalItems,
+    { name: "", price: 0 },
+  ]);
+};
+
+const updateAdditionalItem = (
+  index: number,
+  field: "name" | "price",
+  value: string
+) => {
+  const updated = [...additionalItems];
+
+  updated[index] = {
+    ...updated[index],
+    [field]:
+      field === "price"
+        ? Number(value) || 0
+        : value,
+  };
+
+  setAdditionalItems(updated);
+};
+
+const removeAdditionalItem = (index: number) => {
+  setAdditionalItems(
+    additionalItems.filter((_, i) => i !== index)
+  );
+};
+
 
   const [priceMap, setPriceMap] = useState<Record<string, number>>({});
 
@@ -676,8 +725,8 @@ useEffect(() => {
     : 0;
 
 const finalTotal = useMemo(
-  () => productTotal + deliveryAndAssemblyCost,
-  [productTotal, deliveryAndAssemblyCost]
+  () => productTotal + deliveryAndAssemblyCost + additionalItemsTotal,
+  [productTotal, deliveryAndAssemblyCost, additionalItemsTotal]
 );
 
   const finalTotalFormatted = finalTotal.toLocaleString("en-US", {
@@ -850,7 +899,7 @@ ${shareUrl}
  const logo = await loadImage("/logo-black.png");
 
 if (logo) {
-  doc.addImage(logo, "PNG", 18, 14, 52, 9);
+  doc.addImage(logo, "PNG", 18, 14, 56, 9);
 }
 
   doc.setTextColor(gold);
@@ -973,6 +1022,17 @@ if (logo) {
 
     y += 16;
   });
+
+  additionalItems.forEach((item) => {
+  if (!item.name || item.price <= 0) return;
+
+  y += 10;
+
+  itemRow(
+    item.name,
+    `+€${item.price.toLocaleString()}`
+  );
+});
 
   doc.setDrawColor(gold);
   doc.setLineWidth(0.8);
@@ -1705,6 +1765,75 @@ return (
                 />
                 Include delivery and assembly
               </label>
+
+              <div className="mt-6 rounded-3xl border border-[#2a2a35] p-5 bg-[#111118]">
+  <div className="flex items-center justify-between mb-4">
+    <h3 className="text-white text-xl font-semibold">
+      Dodatni predmeti
+    </h3>
+
+    <button
+      onClick={addAdditionalItem}
+      className="w-12 h-12 rounded-2xl bg-[#c8ad8b] text-black text-3xl flex items-center justify-center hover:opacity-90 transition"
+    >
+      +
+    </button>
+  </div>
+
+  <div className="flex flex-col gap-3">
+    {additionalItems.map((item, index) => (
+      <div
+        key={index}
+        className="flex gap-3 items-center"
+      >
+        <input
+          type="text"
+          placeholder="Ime novega predmeta"
+          value={item.name}
+          onChange={(e) =>
+            updateAdditionalItem(
+              index,
+              "name",
+              e.target.value
+            )
+          }
+          className="flex-1 bg-[#181820] border border-[#2a2a35] rounded-2xl px-5 py-4 text-white outline-none"
+        />
+
+        <input
+          type="number"
+          placeholder="0"
+          value={item.price || ""}
+          onChange={(e) =>
+            updateAdditionalItem(
+              index,
+              "price",
+              e.target.value
+            )
+          }
+          className="w-[140px] bg-[#181820] border border-[#2a2a35] rounded-2xl px-5 py-4 text-white outline-none"
+        />
+
+        <button
+          onClick={() => removeAdditionalItem(index)}
+          className="w-12 h-12 rounded-2xl border border-[#2a2a35] text-[#c8ad8b] hover:bg-[#1b1b24]"
+        >
+          ✕
+        </button>
+      </div>
+    ))}
+  </div>
+
+  <div className="flex justify-between mt-5 pt-4 border-t border-[#2a2a35]">
+    <span className="text-[#c8ad8b]">
+      Skupaj dodatni predmeti
+    </span>
+
+    <span className="text-white font-semibold">
+      €{additionalItemsTotal.toLocaleString()}
+    </span>
+  </div>
+</div>
 
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <button
