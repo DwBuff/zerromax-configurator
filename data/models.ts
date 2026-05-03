@@ -81,7 +81,7 @@ const wood36Categories: Category[] = [
           values: {
             wood: { label: "Vilo - Wood", price: 0 },
             plaster: { label: "Contact facade plaster 1.5mm", price: 0 },
-            larch: { label: "Facade cladding Larch", price: 0 },
+            // larch: { label: "Facade cladding Larch", price: 0 },
           },
         },
       },
@@ -132,7 +132,7 @@ const wood36Categories: Category[] = [
             fixed: { label: "Fixed windows", price: 0 },
             door_quarter: { label: "1/4 Door", price: 0 },
             sliding_quarter: { label: "1/4 Sliding Door", price: 0 },
-            sliding_half: { label: "1/2 Sliding Door", price: 0 },
+            // sliding_half: { label: "1/2 Sliding Door", price: 0 },
           },
         },
       },
@@ -148,6 +148,17 @@ const wood36Categories: Category[] = [
           },
         },
       },
+      {
+  id: "window_glazing",
+  name: "Window Glazing",
+  options: {
+    default: "double",
+    values: {
+      double: { label: "Double glazing", price: 0 },
+      triple: { label: "Triple glazing", price: 0 },
+    },
+  },
+},
       {
         id: "roof_type",
         name: "Roof Type",
@@ -269,7 +280,8 @@ const wood36Categories: Category[] = [
       },
     ],
   },
-  {
+  
+ {
   id: "equipment",
   name: "Equipment",
   subcategories: [
@@ -285,8 +297,28 @@ const wood36Categories: Category[] = [
         },
       },
     },
+
+    {
+  id: "heating_cooling",
+  name: "Heating and cooling",
+  options: {
+    default: "",
+    values: {
+      ac: { label: "Air conditioner", price: 599 },
+      ac_installation: { label: "Air conditioner installation", price: 790 },
+      electric_radiator_2100w: {
+        label: "Electric radiator 2100W",
+        price: 289,
+      },
+      bathroom_electric_radiator_600w: {
+        label: "Bathroom electric radiator 600W",
+        price: 390,
+      },
+    },
+  },
+},
   ],
-}
+},
 ];
 
 const wood50Categories: Category[] = [
@@ -317,7 +349,7 @@ const createModel = (
 
 export const models = {
   wood36: createModel("wood36", "Wood 36", "6m × 4m", "36 m²", 17900, "/models/wood36.glb", wood36Categories),
-  wood50: createModel("wood50", "Wood 50", "8,3m × 5m", "50 m²", 0, "/models/wood50.glb", wood50Categories),
+  wood50: createModel("wood50", "Wood 50", "8,3m × 5m", "50 m²", 23900, "/models/wood50.glb", wood50Categories),
 
   wood80: createModel("wood80", "Wood 80", "10m × 8m", "80 m²", 0, "/models/wood80.glb", []),
   zen30: createModel("zen30", "Zen 30", "10m × 3m", "30 m²", 0, "/models/zen30.glb", []),

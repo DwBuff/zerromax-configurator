@@ -213,7 +213,7 @@ const labelTranslations: Record<string, Record<string, string>> = {
     "Half": "Polovična",
     "Full": "Polna",
 
-    "Vilo - Wood": "Vilo - les",
+    "Vilo - Wood": "Vilo fasada",
     "Contact facade plaster 1.5mm": "Kontaktna fasada 1.5mm",
     "Facade cladding Larch": "Fasadna obloga macesen",
 
@@ -252,6 +252,17 @@ const labelTranslations: Record<string, Record<string, string>> = {
 "1/2 Sliding Door": "1/2 drsna vrata",
 
 "No extra insulation": "Brez dodatne izolacije",
+
+"Window Glazing": "Debelina oken",
+"Double glazing": "Dvoslojna",
+"Triple glazing": "Troslojna",
+
+"Heating and cooling": "Ogrevanje in hlajenje",
+"No heating or cooling": "Brez ogrevanja ali hlajenja",
+"Air conditioner": "Klima",
+"Air conditioner installation": "Montaža klime",
+"Electric radiator 2100W": "Električni radiator 2100W",
+"Bathroom electric radiator 600W": "Kopalniški električni radiator (lojtrica) 600W",
   },
 
   hr: {
@@ -296,7 +307,7 @@ const labelTranslations: Record<string, Record<string, string>> = {
   "Half": "Polovična",
   "Full": "Potpuna",
 
-  "Vilo - Wood": "Vilo - drvo",
+  "Vilo - Wood": "Vilo fasada",
   "Contact facade plaster 1.5mm": "Kontaktna fasada 1.5mm",
   "Facade cladding Larch": "Fasadna obloga ariš",
 
@@ -330,6 +341,17 @@ const labelTranslations: Record<string, Record<string, string>> = {
   "1/2 Sliding Door": "1/2 klizna vrata",
 
   "No extra insulation": "Bez dodatne izolacije",
+
+  "Window Glazing": "Debljina prozora",
+"Double glazing": "Dvoslojna",
+"Triple glazing": "Troslojna",
+
+"Heating and cooling": "Grijanje i hlađenje",
+"No heating or cooling": "Bez grijanja ili hlađenja",
+"Air conditioner": "Klima uređaj",
+"Air conditioner installation": "Montaža klima uređaja",
+"Electric radiator 2100W": "Električni radijator 2100W",
+"Bathroom electric radiator 600W": "Kupaonski električni radijator (lojtrica) 600W",
 }
 };
 
@@ -1085,9 +1107,13 @@ if (logo) {
       return "exclusive_checks";
     }
 
-    if (groupId === "extra_insulation" || groupId === "insulation") {
-      return "single_checkbox";
-    }
+    if (groupId === "heating_cooling") {
+  return "multi_checks";
+}
+
+if (groupId === "extra_insulation" || groupId === "insulation") {
+  return "single_checkbox";
+}
 
     return "cards";
   };
@@ -1150,7 +1176,7 @@ if (logo) {
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
         {visibleEntries.map(([key, value]) => {
           const active = selectedValue === key;
-          const displayPrice = getDisplayPrice("equipment", key)
+          const displayPrice = getDisplayPrice("boiler", key)
 
           return (
             <button
@@ -1275,6 +1301,86 @@ if (logo) {
       </button>
     );
   };
+
+  const renderMultiCheckGroup = (
+  groupId: string,
+  values: Record<string, OptionValue>,
+  selectedValue: string,
+  onSelect: (value: string) => void
+) => {
+  const selected = selectedValue ? selectedValue.split(",").filter(Boolean) : [];
+
+  const toggle = (key: string) => {
+    const next = selected.includes(key)
+      ? selected.filter((item) => item !== key)
+      : [...selected, key];
+
+    onSelect(next.join(","));
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
+      {Object.entries(values).map(([key, value]) => {
+        const active = selected.includes(key);
+        const displayPrice = getDisplayPrice(groupId, key);
+
+        return (
+          <button
+            key={key}
+            onClick={() => toggle(key)}
+            style={{
+              width: "100%",
+              borderRadius: 22,
+              border: active ? "1.5px solid #b79e84" : "1px solid #2a2c31",
+              background: active ? "#1c1d21" : "#17181b",
+              padding: "18px 18px",
+              textAlign: "left",
+              cursor: "pointer",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    border: active ? "1.5px solid #b79e84" : "1px solid #4a4d54",
+                    background: active ? "#b79e84" : "transparent",
+                    color: "#111214",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  {active ? "✓" : ""}
+                </div>
+
+                <div style={{ fontSize: 15, fontWeight: active ? 700 : 500, color: "#f3f0ea" }}>
+                  {translateLabel(value.label)}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  fontSize: 15,
+                  fontWeight: active ? 700 : 500,
+                  color: active ? "#b79e84" : "#b7ab9a",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {displayPrice === 0 ? t.included : priceLabel(displayPrice)}
+              </div>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
 
   const renderOptionGroup = (
     groupId: string,
@@ -1401,6 +1507,10 @@ if (logo) {
     if (uiType === "single_checkbox") {
       return renderInsulationGroup(values, selectedValue, onSelect);
     }
+
+    if (uiType === "multi_checks") {
+  return renderMultiCheckGroup(groupId, values, selectedValue, onSelect);
+}
 
     return renderOptionGroup(groupId, values, selectedValue, onSelect);
   };

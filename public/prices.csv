@@ -20,7 +20,7 @@ wood36.terrace_floor.tropical,3690
 
 # WOOD 36 - WINDOWS TYPE
 wood36.windows_type.fixed,0
-wood36.windows_type.door_quarter,0
+wood36.windows_type.door_quarter,2050
 wood36.windows_type.sliding_quarter,2250
 wood36.windows_type.sliding_half,0
 
@@ -63,8 +63,8 @@ wood36.bathroom.basic,1690
 wood36.bathroom.lux,2690
 
 # WOOD 36 - BATHROOM WALLS
-wood36.bathroom_walls.white,0
-wood36.bathroom_walls.gray,0
+wood36.bathroom_walls.white,590
+wood36.bathroom_walls.gray,590
 
 # WOOD 36 - ROOF TYPE
 wood36.roof_type.sheet,0
@@ -82,5 +82,110 @@ wood36.knee_wall.100,1990
 
 # WOOD 36 - EQUIPMENT
 wood36.equipment.none,0
-wood36.boiler.boiler_50,550
-wood36.boiler.boiler_80,890
+wood36.boiler.boiler_50,349
+wood36.boiler.boiler_80,449
+
+wood36.window_glazing.double,0
+wood36.window_glazing.triple,1390
+
+wood36.heating_cooling.none,0
+wood36.heating_cooling.ac,599
+wood36.heating_cooling.ac_installation,790
+wood36.heating_cooling.electric_radiator_2100w,289
+wood36.heating_cooling.bathroom_electric_radiator_600w,390
+
+# WOOD 50 - FACADE
+wood50.facade.wood,0
+wood50.facade.plaster,5390
+wood50.facade.larch,7670
+
+# WOOD 50 - EXTERIOR DOOR
+wood50.exterior_door.normal,0
+wood50.exterior_door.balcony,0
+
+# WOOD 50 - CANOPY
+wood50.terrace.none,0
+wood50.terrace.70,1190
+
+# WOOD 50 - TERRACE FLOOR
+wood50.terrace_floor.spruce,2390
+wood50.terrace_floor.wpc,3790
+wood50.terrace_floor.tropical,4690
+
+# WOOD 50 - WINDOWS TYPE
+wood50.windows_type.fixed,0
+wood50.windows_type.door_quarter,2790
+wood50.windows_type.sliding_quarter,2990
+wood50.windows_type.sliding_half,0
+
+# WOOD 50 - WINDOW COLOR
+wood50.windows_color.white,0
+wood50.windows_color.anthracite,990
+wood50.windows_color.mixed,990
+
+# WOOD 50 - FLOOR CONSTRUCTION
+wood50.floor_construction.wood,0
+wood50.floor_construction.magnelis,2690
+
+# WOOD 50 - CONSTRUCTION
+wood50.construction.wood,0
+wood50.construction.magnelis,5990
+
+# WOOD 50 - EXTRA INSULATION
+wood50.extra_insulation.none,0
+wood50.extra_insulation.eps100,2390
+
+# WOOD 50 - FLOOR CLADDING
+wood50.floor_cladding.laminate,0
+wood50.floor_cladding.vinyl,790
+
+# WOOD 50 - MANSARD
+wood50.mansard.half,0
+wood50.mansard.full,2590
+
+# WOOD 50 - STAIRCASE
+wood50.staircase.basic,0
+wood50.staircase.hi,1790
+
+# WOOD 50 - INTERIOR WALL
+wood50.interior_wall.plywood,0
+wood50.interior_wall.cladding,3950
+
+# WOOD 50 - BATHROOM EQUIPMENT
+wood50.bathroom.none,0
+wood50.bathroom.basic,2190
+wood50.bathroom.lux,3390
+
+# WOOD 50 - BATHROOM WALLS
+wood50.bathroom_walls.white,790
+wood50.bathroom_walls.gray,790
+
+# WOOD 50 - ROOF TYPE
+wood50.roof_type.sheet,0
+wood50.roof_type.tile,0
+
+# WOOD 50 - ROOF COLOR
+wood50.roof_color.anthracite,0
+wood50.roof_color.black,790
+wood50.roof_color.white,790
+wood50.roof_color.brown,790
+
+# WOOD 50 - KNEE WALL
+wood50.knee_wall.80,0
+wood50.knee_wall.100,2590
+
+# WOOD 50 - EQUIPMENT
+wood50.equipment.none,0
+wood50.boiler.boiler_50,349
+wood50.boiler.boiler_80,449
+
+# WOOD 50 - WINDOW GLAZING
+wood50.window_glazing.double,0
+wood50.window_glazing.triple,1790
+
+# WOOD 50 - HEATING & COOLING
+wood50.heating_cooling.none,0
+wood50.heating_cooling.ac,599
+wood50.heating_cooling.ac_installation,790
+wood50.heating_cooling.electric_radiator_2100w,289
+wood50.heating_cooling.bathroom_electric_radiator_600w,390
