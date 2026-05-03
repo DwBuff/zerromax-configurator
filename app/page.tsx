@@ -781,12 +781,12 @@ ${shareUrl}
   const pageW = 210;
   const pageH = 297;
 
-  const dark = "#111214";
-  const card = "#17181b";
-  const border = "#2a2c31";
+  const dark = "#ffffff";
+  const card = "#f7f7f5";
+  const border = "#d9d9d4";
   const gold = "#b79e84";
-  const white = "#f3f0ea";
-  const muted = "#b7ab9a";
+  const white = "#111214";
+  const muted = "#6f6a63";
 
   const safeText = (value: string) =>
     value
@@ -805,9 +805,9 @@ ${shareUrl}
         })}`;
 
   const addBackground = () => {
-    doc.setFillColor(dark);
-    doc.rect(0, 0, pageW, pageH, "F");
-  };
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, pageW, pageH, "F");
+};
 
   const addLogoText = (x = 18, y = 22, size = 22) => {
     doc.setTextColor(white);
@@ -828,11 +828,12 @@ ${shareUrl}
   const cardBox = (x: number, y: number, w: number, h: number) => {
     doc.setFillColor(card);
     doc.setDrawColor(border);
+    doc.setLineWidth(0.4);
     doc.roundedRect(x, y, w, h, 4, 4, "FD");
   };
 
   const addFooter = () => {
-    doc.setTextColor("#6f6a63");
+    doc.setTextColor("#9a948c");
     doc.setFontSize(9);
     doc.text("ZerroMax © 2026", 18, 286);
     doc.text(`Offer ${offerNumber}`, 180, 286, { align: "right" });
@@ -861,6 +862,9 @@ ${shareUrl}
   doc.setTextColor(white);
   doc.setFontSize(36);
   doc.text(modelDisplayName, 18, 62);
+  doc.setFontSize(14);
+doc.setTextColor(muted);
+doc.text("Premium modular living", 18, 72);
 
   doc.setTextColor(muted);
   doc.setFontSize(13);
