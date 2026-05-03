@@ -520,14 +520,6 @@ const goToNextModel = () => {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryKm, setDeliveryKm] = useState("0");
 
-  const [additionalItems, setAdditionalItems] = useState([
-  { name: "", price: 0 },
-]);
-
-const additionalItemsTotal = additionalItems.reduce(
-  (sum, item) => sum + (Number(item.price) || 0),
-  0
-);
 
 const addAdditionalItem = () => {
   setAdditionalItems([
@@ -1022,17 +1014,6 @@ if (logo) {
 
     y += 16;
   });
-
-  additionalItems.forEach((item) => {
-  if (!item.name || item.price <= 0) return;
-
-  y += 10;
-
-  itemRow(
-    item.name,
-    `+€${item.price.toLocaleString()}`
-  );
-});
 
   doc.setDrawColor(gold);
   doc.setLineWidth(0.8);
