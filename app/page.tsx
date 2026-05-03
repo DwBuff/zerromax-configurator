@@ -850,7 +850,7 @@ ${shareUrl}
  const logo = await loadImage("/logo-black.png");
 
 if (logo) {
-  doc.addImage(logo, "PNG", 18, 14, 46, 10);
+  doc.addImage(logo, "PNG", 18, 14, 52, 9);
 }
 
   doc.setTextColor(gold);
@@ -895,7 +895,6 @@ if (logo) {
   // PAGE 2 — OFFER DETAILS + CONFIGURATION
   doc.addPage();
   addBackground();
-  addLogoText();
 
   sectionTitle(t.offerDetails, 42);
 
@@ -926,7 +925,6 @@ if (logo) {
       addFooter();
       doc.addPage();
       addBackground();
-      addLogoText();
       sectionTitle(t.selectedConfiguration, 42);
       y = 56;
     }
@@ -947,7 +945,6 @@ if (logo) {
   // PAGE 3 — PRICE BREAKDOWN
   doc.addPage();
   addBackground();
-  addLogoText();
 
   sectionTitle(t.productBreakdown, 42);
 
@@ -958,7 +955,6 @@ if (logo) {
       addFooter();
       doc.addPage();
       addBackground();
-      addLogoText();
       sectionTitle(t.productBreakdown, 42);
       y = 58;
     }
