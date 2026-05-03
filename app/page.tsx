@@ -1781,12 +1781,15 @@ return (
 
               <div
   style={{
-    marginTop: 28,
-    padding: 20,
-    borderRadius: 24,
-    border: "1px solid #2a2c31",
-    background: "#17181b",
-  }}
+  width: "100%",
+  boxSizing: "border-box",
+  overflow: "hidden",
+  marginTop: 28,
+  padding: 20,
+  borderRadius: 24,
+  border: "1px solid #2a2c31",
+  background: "#17181b",
+}}
 >
   <div
     style={{
@@ -1824,7 +1827,7 @@ return (
         key={index}
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 140px 48px",
+          gridTemplateColumns: "minmax(0, 1fr) 110px 44px",
           gap: 10,
           alignItems: "center",
         }}
@@ -1837,6 +1840,8 @@ return (
             updateAdditionalItem(index, "name", e.target.value)
           }
           style={{
+            minWidth: 0,
+            boxSizing: "border-box",
             height: 54,
             borderRadius: 16,
             border: "1px solid #2a2c31",
@@ -1856,6 +1861,8 @@ return (
             updateAdditionalItem(index, "price", e.target.value)
           }
           style={{
+            minWidth: 0,
+            boxSizing: "border-box",
             height: 54,
             borderRadius: 16,
             border: "1px solid #2a2c31",
